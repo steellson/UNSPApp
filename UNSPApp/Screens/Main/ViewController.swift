@@ -6,15 +6,24 @@
 //
 
 import UIKit
+import SnapKit
 
-final class ViewController: UIViewController {
-
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        
-        view.backgroundColor = .systemBlue
-    }
+final class ViewController: BaseController {
 
 
 }
 
+
+//MARK: - Base
+
+extension ViewController {
+    
+    override func setupView() {
+        super.setupView()
+        view.backgroundColor = R.Colors.primaryBackgroundColor
+    }
+    
+    override func setupLayout() {
+        super.setupLayout()
+    }
+}

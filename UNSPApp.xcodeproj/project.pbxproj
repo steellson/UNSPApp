@@ -10,9 +10,15 @@
 		3D8254FF2AE6A03E00D84FC7 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D8254FE2AE6A03E00D84FC7 /* AppDelegate.swift */; };
 		3D8255012AE6A03E00D84FC7 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D8255002AE6A03E00D84FC7 /* SceneDelegate.swift */; };
 		3D8255032AE6A03E00D84FC7 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D8255022AE6A03E00D84FC7 /* ViewController.swift */; };
-		3D8255062AE6A03E00D84FC7 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 3D8255042AE6A03E00D84FC7 /* Main.storyboard */; };
 		3D8255082AE6A03E00D84FC7 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3D8255072AE6A03E00D84FC7 /* Assets.xcassets */; };
 		3D82550B2AE6A03E00D84FC7 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 3D8255092AE6A03E00D84FC7 /* LaunchScreen.storyboard */; };
+		3D8255172AE6A92700D84FC7 /* Resources.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D8255162AE6A92700D84FC7 /* Resources.swift */; };
+		3D82551A2AE6A9A200D84FC7 /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = 3D8255192AE6A9A200D84FC7 /* SnapKit */; };
+		3D82551D2AE6A9D300D84FC7 /* CombineMoya in Frameworks */ = {isa = PBXBuildFile; productRef = 3D82551C2AE6A9D300D84FC7 /* CombineMoya */; };
+		3D82551F2AE6A9D300D84FC7 /* Moya in Frameworks */ = {isa = PBXBuildFile; productRef = 3D82551E2AE6A9D300D84FC7 /* Moya */; };
+		3D8255232AE6B0C900D84FC7 /* BaseController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D8255212AE6B0C900D84FC7 /* BaseController.swift */; };
+		3D8255242AE6B0C900D84FC7 /* BaseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D8255222AE6B0C900D84FC7 /* BaseView.swift */; };
+		3D8255272AE6B32000D84FC7 /* APIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D8255262AE6B32000D84FC7 /* APIService.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -20,10 +26,13 @@
 		3D8254FE2AE6A03E00D84FC7 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		3D8255002AE6A03E00D84FC7 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		3D8255022AE6A03E00D84FC7 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
-		3D8255052AE6A03E00D84FC7 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		3D8255072AE6A03E00D84FC7 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		3D82550A2AE6A03E00D84FC7 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		3D82550C2AE6A03E00D84FC7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		3D8255162AE6A92700D84FC7 /* Resources.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Resources.swift; sourceTree = "<group>"; };
+		3D8255212AE6B0C900D84FC7 /* BaseController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BaseController.swift; sourceTree = "<group>"; };
+		3D8255222AE6B0C900D84FC7 /* BaseView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BaseView.swift; sourceTree = "<group>"; };
+		3D8255262AE6B32000D84FC7 /* APIService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIService.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -31,6 +40,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3D82551D2AE6A9D300D84FC7 /* CombineMoya in Frameworks */,
+				3D82551A2AE6A9A200D84FC7 /* SnapKit in Frameworks */,
+				3D82551F2AE6A9D300D84FC7 /* Moya in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -56,15 +68,74 @@
 		3D8254FD2AE6A03E00D84FC7 /* UNSPApp */ = {
 			isa = PBXGroup;
 			children = (
-				3D8254FE2AE6A03E00D84FC7 /* AppDelegate.swift */,
-				3D8255002AE6A03E00D84FC7 /* SceneDelegate.swift */,
-				3D8255022AE6A03E00D84FC7 /* ViewController.swift */,
-				3D8255042AE6A03E00D84FC7 /* Main.storyboard */,
-				3D8255072AE6A03E00D84FC7 /* Assets.xcassets */,
-				3D8255092AE6A03E00D84FC7 /* LaunchScreen.storyboard */,
 				3D82550C2AE6A03E00D84FC7 /* Info.plist */,
+				3D8255122AE6A8BC00D84FC7 /* App */,
+				3D8255152AE6A8FE00D84FC7 /* Resources */,
+				3D8255252AE6B30600D84FC7 /* Services */,
+				3D8255132AE6A8CB00D84FC7 /* Screens */,
 			);
 			path = UNSPApp;
+			sourceTree = "<group>";
+		};
+		3D8255122AE6A8BC00D84FC7 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				3D8254FE2AE6A03E00D84FC7 /* AppDelegate.swift */,
+				3D8255002AE6A03E00D84FC7 /* SceneDelegate.swift */,
+				3D8255202AE6B09C00D84FC7 /* Base */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		3D8255132AE6A8CB00D84FC7 /* Screens */ = {
+			isa = PBXGroup;
+			children = (
+				3D8255092AE6A03E00D84FC7 /* LaunchScreen.storyboard */,
+				3D8255142AE6A8DB00D84FC7 /* Main */,
+			);
+			path = Screens;
+			sourceTree = "<group>";
+		};
+		3D8255142AE6A8DB00D84FC7 /* Main */ = {
+			isa = PBXGroup;
+			children = (
+				3D8255022AE6A03E00D84FC7 /* ViewController.swift */,
+			);
+			path = Main;
+			sourceTree = "<group>";
+		};
+		3D8255152AE6A8FE00D84FC7 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				3D8255162AE6A92700D84FC7 /* Resources.swift */,
+				3D8255072AE6A03E00D84FC7 /* Assets.xcassets */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		3D8255202AE6B09C00D84FC7 /* Base */ = {
+			isa = PBXGroup;
+			children = (
+				3D8255212AE6B0C900D84FC7 /* BaseController.swift */,
+				3D8255222AE6B0C900D84FC7 /* BaseView.swift */,
+			);
+			path = Base;
+			sourceTree = "<group>";
+		};
+		3D8255252AE6B30600D84FC7 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				3D8255282AE6B33900D84FC7 /* API */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		3D8255282AE6B33900D84FC7 /* API */ = {
+			isa = PBXGroup;
+			children = (
+				3D8255262AE6B32000D84FC7 /* APIService.swift */,
+			);
+			path = API;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -83,6 +154,11 @@
 			dependencies = (
 			);
 			name = UNSPApp;
+			packageProductDependencies = (
+				3D8255192AE6A9A200D84FC7 /* SnapKit */,
+				3D82551C2AE6A9D300D84FC7 /* CombineMoya */,
+				3D82551E2AE6A9D300D84FC7 /* Moya */,
+			);
 			productName = UNSPApp;
 			productReference = 3D8254FB2AE6A03E00D84FC7 /* UNSPApp.app */;
 			productType = "com.apple.product-type.application";
@@ -111,6 +187,10 @@
 				Base,
 			);
 			mainGroup = 3D8254F22AE6A03E00D84FC7;
+			packageReferences = (
+				3D8255182AE6A9A200D84FC7 /* XCRemoteSwiftPackageReference "SnapKit" */,
+				3D82551B2AE6A9D300D84FC7 /* XCRemoteSwiftPackageReference "Moya" */,
+			);
 			productRefGroup = 3D8254FC2AE6A03E00D84FC7 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -127,7 +207,6 @@
 			files = (
 				3D82550B2AE6A03E00D84FC7 /* LaunchScreen.storyboard in Resources */,
 				3D8255082AE6A03E00D84FC7 /* Assets.xcassets in Resources */,
-				3D8255062AE6A03E00D84FC7 /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -139,6 +218,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				3D8255032AE6A03E00D84FC7 /* ViewController.swift in Sources */,
+				3D8255272AE6B32000D84FC7 /* APIService.swift in Sources */,
+				3D8255172AE6A92700D84FC7 /* Resources.swift in Sources */,
+				3D8255232AE6B0C900D84FC7 /* BaseController.swift in Sources */,
+				3D8255242AE6B0C900D84FC7 /* BaseView.swift in Sources */,
 				3D8254FF2AE6A03E00D84FC7 /* AppDelegate.swift in Sources */,
 				3D8255012AE6A03E00D84FC7 /* SceneDelegate.swift in Sources */,
 			);
@@ -147,14 +230,6 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXVariantGroup section */
-		3D8255042AE6A03E00D84FC7 /* Main.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				3D8255052AE6A03E00D84FC7 /* Base */,
-			);
-			name = Main.storyboard;
-			sourceTree = "<group>";
-		};
 		3D8255092AE6A03E00D84FC7 /* LaunchScreen.storyboard */ = {
 			isa = PBXVariantGroup;
 			children = (
@@ -297,9 +372,8 @@
 				INFOPLIST_FILE = UNSPApp/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
-				INFOPLIST_KEY_UIMainStoryboardFile = Main;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -307,9 +381,12 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.steellson.unspapp.UNSPApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
@@ -325,9 +402,8 @@
 				INFOPLIST_FILE = UNSPApp/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
-				INFOPLIST_KEY_UIMainStoryboardFile = Main;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -335,9 +411,12 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.steellson.unspapp.UNSPApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};
@@ -363,6 +442,43 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		3D8255182AE6A9A200D84FC7 /* XCRemoteSwiftPackageReference "SnapKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/SnapKit/SnapKit";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.6.0;
+			};
+		};
+		3D82551B2AE6A9D300D84FC7 /* XCRemoteSwiftPackageReference "Moya" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Moya/Moya";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 15.0.3;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		3D8255192AE6A9A200D84FC7 /* SnapKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3D8255182AE6A9A200D84FC7 /* XCRemoteSwiftPackageReference "SnapKit" */;
+			productName = SnapKit;
+		};
+		3D82551C2AE6A9D300D84FC7 /* CombineMoya */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3D82551B2AE6A9D300D84FC7 /* XCRemoteSwiftPackageReference "Moya" */;
+			productName = CombineMoya;
+		};
+		3D82551E2AE6A9D300D84FC7 /* Moya */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3D82551B2AE6A9D300D84FC7 /* XCRemoteSwiftPackageReference "Moya" */;
+			productName = Moya;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 3D8254F32AE6A03E00D84FC7 /* Project object */;
 }
