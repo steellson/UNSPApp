@@ -15,7 +15,14 @@ enum R {
     
     //MARK: - Strings
     enum Strings: String {
-        case test = ""
+        
+        // Title strings
+        case mainScreenTitle = "Pick some image for details ..."
+        
+        
+        // API
+        case apiAccessKey = "JhHk7WPduzX_0Mn0aaJ8qjU4ZQzdGc5-Q7y4388lhk8"
+        case baseUrlString = "https://api.unsplash.com"
     }
     
     
