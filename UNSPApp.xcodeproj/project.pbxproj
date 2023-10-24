@@ -14,13 +14,13 @@
 		3D82550B2AE6A03E00D84FC7 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 3D8255092AE6A03E00D84FC7 /* LaunchScreen.storyboard */; };
 		3D8255172AE6A92700D84FC7 /* Resources.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D8255162AE6A92700D84FC7 /* Resources.swift */; };
 		3D82551A2AE6A9A200D84FC7 /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = 3D8255192AE6A9A200D84FC7 /* SnapKit */; };
-		3D82551D2AE6A9D300D84FC7 /* CombineMoya in Frameworks */ = {isa = PBXBuildFile; productRef = 3D82551C2AE6A9D300D84FC7 /* CombineMoya */; };
-		3D82551F2AE6A9D300D84FC7 /* Moya in Frameworks */ = {isa = PBXBuildFile; productRef = 3D82551E2AE6A9D300D84FC7 /* Moya */; };
 		3D8255232AE6B0C900D84FC7 /* BaseController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D8255212AE6B0C900D84FC7 /* BaseController.swift */; };
 		3D8255242AE6B0C900D84FC7 /* BaseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D8255222AE6B0C900D84FC7 /* BaseView.swift */; };
 		3D8255272AE6B32000D84FC7 /* APIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D8255262AE6B32000D84FC7 /* APIService.swift */; };
-		3D82552A2AE6B9F100D84FC7 /* UnspashAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D8255292AE6B9F100D84FC7 /* UnspashAPI.swift */; };
 		3D82552C2AE6BC8D00D84FC7 /* MainViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D82552B2AE6BC8D00D84FC7 /* MainViewModel.swift */; };
+		3D8255302AE7A75000D84FC7 /* Photo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D82552F2AE7A75000D84FC7 /* Photo.swift */; };
+		3D8255322AE7B3AA00D84FC7 /* Client.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D8255312AE7B3AA00D84FC7 /* Client.swift */; };
+		3D8255352AE7B80100D84FC7 /* GetPhotosResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D8255342AE7B80100D84FC7 /* GetPhotosResponse.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -35,8 +35,10 @@
 		3D8255212AE6B0C900D84FC7 /* BaseController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BaseController.swift; sourceTree = "<group>"; };
 		3D8255222AE6B0C900D84FC7 /* BaseView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BaseView.swift; sourceTree = "<group>"; };
 		3D8255262AE6B32000D84FC7 /* APIService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIService.swift; sourceTree = "<group>"; };
-		3D8255292AE6B9F100D84FC7 /* UnspashAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnspashAPI.swift; sourceTree = "<group>"; };
 		3D82552B2AE6BC8D00D84FC7 /* MainViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewModel.swift; sourceTree = "<group>"; };
+		3D82552F2AE7A75000D84FC7 /* Photo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Photo.swift; sourceTree = "<group>"; };
+		3D8255312AE7B3AA00D84FC7 /* Client.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Client.swift; sourceTree = "<group>"; };
+		3D8255342AE7B80100D84FC7 /* GetPhotosResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GetPhotosResponse.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -44,9 +46,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3D82551D2AE6A9D300D84FC7 /* CombineMoya in Frameworks */,
 				3D82551A2AE6A9A200D84FC7 /* SnapKit in Frameworks */,
-				3D82551F2AE6A9D300D84FC7 /* Moya in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -74,6 +74,7 @@
 			children = (
 				3D82550C2AE6A03E00D84FC7 /* Info.plist */,
 				3D8255122AE6A8BC00D84FC7 /* App */,
+				3D82552E2AE7A74500D84FC7 /* Entities */,
 				3D8255152AE6A8FE00D84FC7 /* Resources */,
 				3D8255252AE6B30600D84FC7 /* Services */,
 				3D8255132AE6A8CB00D84FC7 /* Screens */,
@@ -130,18 +131,9 @@
 		3D8255252AE6B30600D84FC7 /* Services */ = {
 			isa = PBXGroup;
 			children = (
-				3D8255282AE6B33900D84FC7 /* API */,
+				3D8255262AE6B32000D84FC7 /* APIService.swift */,
 			);
 			path = Services;
-			sourceTree = "<group>";
-		};
-		3D8255282AE6B33900D84FC7 /* API */ = {
-			isa = PBXGroup;
-			children = (
-				3D8255262AE6B32000D84FC7 /* APIService.swift */,
-				3D8255292AE6B9F100D84FC7 /* UnspashAPI.swift */,
-			);
-			path = API;
 			sourceTree = "<group>";
 		};
 		3D82552D2AE6C02700D84FC7 /* Views */ = {
@@ -150,6 +142,24 @@
 				3D8255022AE6A03E00D84FC7 /* MainViewController.swift */,
 			);
 			path = Views;
+			sourceTree = "<group>";
+		};
+		3D82552E2AE7A74500D84FC7 /* Entities */ = {
+			isa = PBXGroup;
+			children = (
+				3D8255312AE7B3AA00D84FC7 /* Client.swift */,
+				3D8255332AE7B7CE00D84FC7 /* Photo */,
+			);
+			path = Entities;
+			sourceTree = "<group>";
+		};
+		3D8255332AE7B7CE00D84FC7 /* Photo */ = {
+			isa = PBXGroup;
+			children = (
+				3D82552F2AE7A75000D84FC7 /* Photo.swift */,
+				3D8255342AE7B80100D84FC7 /* GetPhotosResponse.swift */,
+			);
+			path = Photo;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -170,8 +180,6 @@
 			name = UNSPApp;
 			packageProductDependencies = (
 				3D8255192AE6A9A200D84FC7 /* SnapKit */,
-				3D82551C2AE6A9D300D84FC7 /* CombineMoya */,
-				3D82551E2AE6A9D300D84FC7 /* Moya */,
 			);
 			productName = UNSPApp;
 			productReference = 3D8254FB2AE6A03E00D84FC7 /* UNSPApp.app */;
@@ -203,7 +211,6 @@
 			mainGroup = 3D8254F22AE6A03E00D84FC7;
 			packageReferences = (
 				3D8255182AE6A9A200D84FC7 /* XCRemoteSwiftPackageReference "SnapKit" */,
-				3D82551B2AE6A9D300D84FC7 /* XCRemoteSwiftPackageReference "Moya" */,
 			);
 			productRefGroup = 3D8254FC2AE6A03E00D84FC7 /* Products */;
 			projectDirPath = "";
@@ -235,10 +242,12 @@
 				3D8255272AE6B32000D84FC7 /* APIService.swift in Sources */,
 				3D8255172AE6A92700D84FC7 /* Resources.swift in Sources */,
 				3D8255232AE6B0C900D84FC7 /* BaseController.swift in Sources */,
+				3D8255322AE7B3AA00D84FC7 /* Client.swift in Sources */,
+				3D8255302AE7A75000D84FC7 /* Photo.swift in Sources */,
 				3D8255242AE6B0C900D84FC7 /* BaseView.swift in Sources */,
+				3D8255352AE7B80100D84FC7 /* GetPhotosResponse.swift in Sources */,
 				3D8254FF2AE6A03E00D84FC7 /* AppDelegate.swift in Sources */,
 				3D8255012AE6A03E00D84FC7 /* SceneDelegate.swift in Sources */,
-				3D82552A2AE6B9F100D84FC7 /* UnspashAPI.swift in Sources */,
 				3D82552C2AE6BC8D00D84FC7 /* MainViewModel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -468,14 +477,6 @@
 				minimumVersion = 5.6.0;
 			};
 		};
-		3D82551B2AE6A9D300D84FC7 /* XCRemoteSwiftPackageReference "Moya" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/Moya/Moya";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 15.0.3;
-			};
-		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -483,16 +484,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 3D8255182AE6A9A200D84FC7 /* XCRemoteSwiftPackageReference "SnapKit" */;
 			productName = SnapKit;
-		};
-		3D82551C2AE6A9D300D84FC7 /* CombineMoya */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 3D82551B2AE6A9D300D84FC7 /* XCRemoteSwiftPackageReference "Moya" */;
-			productName = CombineMoya;
-		};
-		3D82551E2AE6A9D300D84FC7 /* Moya */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 3D82551B2AE6A9D300D84FC7 /* XCRemoteSwiftPackageReference "Moya" */;
-			productName = Moya;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

@@ -35,6 +35,8 @@ extension MainViewController {
         super.setupView()
         
         view.backgroundColor = R.Colors.primaryBackgroundColor
+        
+        viewModel.getPhotos()
     }
     
     override func setupLayout() {
