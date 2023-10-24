@@ -7,6 +7,9 @@
 
 import UIKit
 import SnapKit
+import Combine
+
+//MARK: - Impl
 
 final class MainViewController: BaseController {
 
@@ -20,6 +23,8 @@ final class MainViewController: BaseController {
         iv.translatesAutoresizingMaskIntoConstraints = false
         return iv
     }()
+    
+    private var cancellables = Set<AnyCancellable>()
     
     init(
         viewModel: MainViewModelProtocol
@@ -42,12 +47,7 @@ extension MainViewController {
     override func setupView() {
         super.setupView()
         
-        view.backgroundColor = R.Colors.primaryBackgroundColor
-        view.addSubview(imageView)
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(3)) { [weak self] in
-            self?.testImageDownloading()
-        }
+        view.addNewSubview(imageView)
     }
     
     override func setupLayout() {
@@ -58,28 +58,42 @@ extension MainViewController {
             $0.center.equalToSuperview()
         }
     }
+    
+    override func setupBindings() {
+        super.setupBindings()
+        
+        bind()
+    }
 }
 
-//MARK: - Manage
+//MARK: - Bindings
 
 private extension MainViewController {
     
-    func testImageDownloading() {
-        let photoURL = viewModel.photos[0].links.download
-
-        viewModel.getConcretePhoto(fromURL: photoURL) { [weak self] result in
-            switch result {
-            case .success(let data):
-                DispatchQueue.main.async {
+    func bind() {
+        
+        viewModel.photos
+            .publisher
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] photo in
+                
+            guard self?.viewModel.state == .normal else {
+                print("ERROR: ViewModel state is not in normal selection"); return
+            }
+                        
+            self?.viewModel.getConcretePhoto(fromURL: photo.links.download, completion: { result in
+                switch result {
+                case .success(let data):
                     guard let image = UIImage(data: data) else {
-                        print("ERROR: Couldt get image from data on VC"); return
+                        print("ERROR: Couldnt convert image from data!"); return
                     }
                     self?.imageView.image = image
+                    print("SUCCESS: Image setted!")
+                case .failure(let error):
+                    print("ERROR: Couldnt get photo on VC \(error.localizedDescription)")
                 }
-            case .failure(let error):
-                print("Photo does not settupped in imageView, error - \(error)")
-            }
+            })
         }
+        .store(in: &cancellables)
     }
-    
 }

@@ -10,10 +10,18 @@ class BaseController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
         setupView()
         setupNavBar()
+    }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
         setupLayout()
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        setupBindings()
     }
 }
 
@@ -28,4 +36,6 @@ class BaseController: UIViewController {
      func setupNavBar() { }
     
      func setupLayout() { }
+    
+    func setupBindings() { }
 }

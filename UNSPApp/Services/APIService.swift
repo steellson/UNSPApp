@@ -16,21 +16,20 @@ protocol APIServiceProtocol: AnyObject {
 
 //MARK: - Selections
 
+enum APIEndpoints: String {
+    case getPhotos = "/photos"
+}
+
 enum HTTPMethod: String {
     case GET
     case POST
 }
-
 
 enum RequestError: Error {
     case urlError
     case decodingError
     case requestError
     case noData
-}
-
-enum APIEndpoints: String {
-    case getPhotos = "/photos"
 }
 
 
@@ -51,7 +50,6 @@ final class APIService {
 extension APIService: APIServiceProtocol {
     
     //MARK:  Get all photos
-    
     func fetchPhotos(completion: @escaping (Result<[Photo], RequestError>) -> Void) {
         guard let combinedURL = URL(
             string: baseUrlString + endpoint + "?client_id=\(client.clientID)"
@@ -86,7 +84,7 @@ extension APIService: APIServiceProtocol {
                     )
                 }
                 completion(.success(photos))
-                print("SUCCESS: Photos fetched succsessfully!")
+                print(R.Strings.photosFetched.rawValue)
             } catch {
                 completion(.failure(.decodingError))
                 print("ERROR: Decoding images promlem \(error)")
@@ -96,7 +94,6 @@ extension APIService: APIServiceProtocol {
     
     
     //MARK: Get concrete photo
-    
     func downloadPhoto(fromURL url: String, completion: @escaping (Result<Data, RequestError>) -> Void) {
         guard let currentURL = URL(string: url) else {
             print("ERROR: Coudlt get URL")
@@ -120,7 +117,7 @@ extension APIService: APIServiceProtocol {
                 return
             }
             completion(.success(data))
-            print("SUCCESS: Photo downloaded succsessfully!")
+            print(R.Strings.photoFetched.rawValue)
 
         }.resume()
     }

@@ -18,7 +18,9 @@ enum MainViewModelState {
 //MARK: - Protocol
 
 protocol MainViewModelProtocol: AnyObject {
+    var state: MainViewModelState { get }
     var photos: [Photo] { get }
+    
     func getAllPhotos()
     func getConcretePhoto(fromURL url: String, completion: @escaping (Result<Data, Error>) -> Void)
 }
@@ -28,12 +30,12 @@ protocol MainViewModelProtocol: AnyObject {
 
 final class MainViewModel {
     
-    @Published var state: MainViewModelState = .normal
+    private(set) var state: MainViewModelState = .normal
     
-    @Published private(set) var photos = [Photo]() {
+    private(set) var photos = [Photo]() {
         didSet {
             guard !photos.isEmpty else { return }
-            print("MainViewModel photos data setted!")
+            print(R.Strings.photoDataSourceUpdated.rawValue)
         }
     }
     
