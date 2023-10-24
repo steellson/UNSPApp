@@ -18,7 +18,9 @@ enum MainViewModelState {
 //MARK: - Protocol
 
 protocol MainViewModelProtocol: AnyObject {
-    func getPhotos()
+    var photos: [Photo] { get }
+    func getAllPhotos()
+    func getConcretePhoto(fromURL url: String, completion: @escaping (Result<Data, Error>) -> Void)
 }
 
 
@@ -28,10 +30,10 @@ final class MainViewModel {
     
     @Published var state: MainViewModelState = .normal
     
-    @Published var photos = [Photo]() {
+    @Published private(set) var photos = [Photo]() {
         didSet {
             guard !photos.isEmpty else { return }
-            print("MainViewModel photos data setted!\n\(photos)")
+            print("MainViewModel photos data setted!")
         }
     }
     
@@ -41,13 +43,16 @@ final class MainViewModel {
         apiService: APIServiceProtocol
     ) {
         self.apiService = apiService
+        
+        getAllPhotos()
     }
 }
 
 //MARK: - Protocol extension
 
 extension MainViewModel: MainViewModelProtocol {
-    func getPhotos() {
+    
+    func getAllPhotos() {
         guard state != .loading else {
             print("ERROR: Couldnt start loading beceuse it is already started"); return
         }
@@ -63,6 +68,27 @@ extension MainViewModel: MainViewModelProtocol {
                 case .failure(let error):
                     print(error.localizedDescription)
                     self?.photos = []
+                    self?.state = .error
+                }
+            }
+        }
+    }
+    
+    func getConcretePhoto(fromURL url: String, completion: @escaping (Result<Data, Error>) -> Void) {
+        guard state != .loading else {
+            print("ERROR: Couldnt start loading beceuse it is already started"); return
+        }
+        state = .loading
+        
+        apiService.downloadPhoto(fromURL: url) { [weak self] result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success(let data):
+                    completion(.success(data))
+                    self?.state = .normal
+                case .failure(let error):
+                    print(error.localizedDescription)
+                    completion(.failure(error))
                     self?.state = .error
                 }
             }

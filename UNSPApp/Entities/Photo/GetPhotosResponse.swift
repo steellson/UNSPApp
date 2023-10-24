@@ -37,18 +37,6 @@ struct GetPhotosResponseElement: Decodable {
     }
 }
 
-// MARK: - GetPhotosResponseLinks
-
-struct GetPhotosResponseLinks: Decodable {
-    let linksSelf, html, download, downloadLocation: String
-
-    enum CodingKeys: String, CodingKey {
-        case linksSelf = "self"
-        case html, download
-        case downloadLocation = "download_location"
-    }
-}
-
 
 // MARK: - Urls
 
