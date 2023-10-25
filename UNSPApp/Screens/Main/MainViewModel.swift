@@ -45,8 +45,8 @@ final class MainViewModel {
         apiService: APIServiceProtocol
     ) {
         self.apiService = apiService
-        
-        getAllPhotos()
+        #warning("need uncommit after layout configurating")
+//        getAllPhotos()
     }
 }
 

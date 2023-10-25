@@ -23,6 +23,9 @@ enum R {
         case apiAccessKey = "JhHk7WPduzX_0Mn0aaJ8qjU4ZQzdGc5-Q7y4388lhk8"
         case baseUrlString = "https://api.unsplash.com"
         
+        // Identity
+        case imageCellIdentifier = "imageCellIdentifier"
+        
         // Log messages
         case photosFetched = "SUCCESS: Photos fetched succsessfully!"
         case photoFetched = "SUCCESS: Photo downloaded succsessfully!"
