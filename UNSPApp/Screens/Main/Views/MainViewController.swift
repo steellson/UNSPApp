@@ -26,9 +26,11 @@ final class MainViewController: BaseController {
     }()
     
     private lazy var collectionView = makeCollectionView()
-
+    
+    private var dataSource: UICollectionViewDiffableDataSource<Section, Photo>!
     
     private var cancellables = Set<AnyCancellable>()
+    
     
     init(
         viewModel: MainViewModelProtocol
@@ -41,7 +43,7 @@ final class MainViewController: BaseController {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
+        
     private func makeCollectionView() -> UICollectionView {
         let flowLayout = UICollectionViewFlowLayout()
         flowLayout.scrollDirection = .vertical
@@ -49,10 +51,9 @@ final class MainViewController: BaseController {
         let cv = UICollectionView(frame: .zero, collectionViewLayout: flowLayout)
         cv.backgroundColor = .systemBackground.withAlphaComponent(0.5)
         cv.showsVerticalScrollIndicator = false
+        cv.dataSource = dataSource
         cv.delegate = self
-        cv.dataSource = self
         cv.register(ImageCell.self, forCellWithReuseIdentifier: ImageCell.imageCellIdentifier)
-        
         return cv
     }
 }
@@ -64,7 +65,7 @@ extension MainViewController {
     
     override func setupView() {
         super.setupView()
-        
+        setupDataSource()
         view.addNewSubview(titleLabel)
         view.addNewSubview(collectionView)
     }
@@ -92,42 +93,52 @@ extension MainViewController {
     override func setupBindings() {
         super.setupBindings()
         
-        bind()
+        bindPhotoCollection()
     }
 }
 
-//MARK: - DataSource
+//MARK: - DataSource + Snapshot
 
-extension MainViewController: UICollectionViewDataSource {
+private extension MainViewController {
     
-    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return viewModel.photos.count
+    func setupDataSource() {
+        dataSource = UICollectionViewDiffableDataSource(
+            collectionView: collectionView,
+            cellProvider: { [weak self] (collectionView, indexPath, itemIdentifier) -> UICollectionViewCell? in
+                
+                guard let imageCell = collectionView.dequeueReusableCell(
+                    withReuseIdentifier: ImageCell.imageCellIdentifier,
+                    for: indexPath
+                ) as? ImageCell else {
+                    print("ERROR: Couldnt dequeue cell with reuse identifier"); return UICollectionViewCell()
+                }
+            
+                self?.viewModel.getConcretePhoto(fromURL: self?.viewModel.photos[indexPath.item].links.download) { result in
+                    switch result {
+                    case .success(let imageData):
+                        guard let recievedImage = UIImage(data: imageData) else {
+                            print("ERROR: Couldt get recieved image"); 
+                            imageCell.configureCell(withImage: UIImage(systemName: "bandage")!)
+                            return
+                        }
+                        imageCell.configureCell(withImage: recievedImage)
+                    case .failure:
+                        guard let systemImage = UIImage(systemName: "bandage") else {
+                            print("ERROR: Couldt get system image"); return
+                        }
+                        imageCell.configureCell(withImage: systemImage)
+                    }
+                }
+                return imageCell
+            })
     }
     
-    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        guard let imageCell = collectionView.dequeueReusableCell(
-            withReuseIdentifier: ImageCell.imageCellIdentifier,
-            for: indexPath
-        ) as? ImageCell else {
-            print(); return UICollectionViewCell()
-        }
+    func updateSnapshot(withPhotos photos: [Photo]) {
+        var snapshot = NSDiffableDataSourceSnapshot<Section, Photo>()
+        snapshot.appendSections([.main])
+        snapshot.appendItems(photos)
         
-        viewModel.getConcretePhoto(fromURL: viewModel.photos[indexPath.item].links.download) { result in
-            switch result {
-            case .success(let imageData):
-                guard let recievedImage = UIImage(data: imageData) else {
-                    print("ERROR: Couldt get recieved image"); return
-                }
-                imageCell.configureCell(withImage: recievedImage)
-            case .failure:
-                guard let systemImage = UIImage(systemName: "bandage") else {
-                    print("ERROR: Couldt get system image"); return
-                }
-                imageCell.configureCell(withImage: systemImage)
-            }
-        }
-        
-        return imageCell
+        dataSource.apply(snapshot, animatingDifferences: true)
     }
 }
 
@@ -144,30 +155,18 @@ extension MainViewController: UICollectionViewDelegate {
 
 private extension MainViewController {
     
-    func bind() {
+    func bindPhotoCollection() {
         
         viewModel.photos
             .publisher
+            .collect()
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] photo in
-                
-            guard self?.viewModel.state == .normal else {
-                print("ERROR: ViewModel state is not in normal selection"); return
-            }
-                        
-            self?.viewModel.getConcretePhoto(fromURL: photo.links.download, completion: { result in
-                switch result {
-                case .success(let data):
-                    guard let image = UIImage(data: data) else {
-                        print("ERROR: Couldnt convert image from data!"); return
-                    }
-                    
-                    print("SUCCESS: Image setted!")
-                case .failure(let error):
-                    print("ERROR: Couldnt get photo on VC \(error.localizedDescription)")
+            .sink { [weak self] photos in
+                DispatchQueue.main.async {
+                    self?.updateSnapshot(withPhotos: photos)
+                    self?.collectionView.reloadData()
                 }
-            })
-        }
-        .store(in: &cancellables)
+            }
+            .store(in: &cancellables)
     }
 }

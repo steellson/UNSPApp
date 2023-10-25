@@ -12,6 +12,15 @@ struct Photo {
     let links: GetPhotosResponseLinks
 }
 
+extension Photo: Hashable {
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+    
+    static func == (lhs: Photo, rhs: Photo) -> Bool {
+        lhs.id == rhs.id
+    }
+}
 
 // MARK: - GetPhotosResponseLinks
 

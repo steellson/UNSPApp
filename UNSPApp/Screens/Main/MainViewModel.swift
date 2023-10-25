@@ -10,6 +10,7 @@ import Foundation
 //MARK: - State
 
 enum MainViewModelState {
+    case none
     case normal
     case loading
     case error
@@ -22,7 +23,7 @@ protocol MainViewModelProtocol: AnyObject {
     var photos: [Photo] { get }
     
     func getAllPhotos()
-    func getConcretePhoto(fromURL url: String, completion: @escaping (Result<Data, Error>) -> Void)
+    func getConcretePhoto(fromURL url: String?, completion: @escaping (Result<Data, Error>) -> Void)
 }
 
 
@@ -30,9 +31,15 @@ protocol MainViewModelProtocol: AnyObject {
 
 final class MainViewModel {
     
-    private(set) var state: MainViewModelState = .normal
+    private(set) var state: MainViewModelState = .none {
+        willSet {
+            if newValue != state {
+                print("MainViewModel current state = \(state)")
+            }
+        }
+    }
     
-    private(set) var photos = [Photo]() {
+    @Published private(set) var photos = [Photo]() {
         didSet {
             guard !photos.isEmpty else { return }
             print(R.Strings.photoDataSourceUpdated.rawValue)
@@ -45,8 +52,9 @@ final class MainViewModel {
         apiService: APIServiceProtocol
     ) {
         self.apiService = apiService
-        #warning("need uncommit after layout configurating")
-//        getAllPhotos()
+        
+//        #warning("need uncommit after layout configurating")
+        getAllPhotos()
     }
 }
 
@@ -58,27 +66,31 @@ extension MainViewModel: MainViewModelProtocol {
         guard state != .loading else {
             print("ERROR: Couldnt start loading beceuse it is already started"); return
         }
-        state = .loading
+        
         photos = []
+        state = .loading
         
         apiService.fetchPhotos { [weak self] result in
             DispatchQueue.main.async {
                 switch result {
                 case .success(let photos):
                     self?.photos = photos
+                    
                     self?.state = .normal
+                    
                 case .failure(let error):
                     print(error.localizedDescription)
                     self?.photos = []
                     self?.state = .error
+                    
                 }
             }
         }
     }
     
-    func getConcretePhoto(fromURL url: String, completion: @escaping (Result<Data, Error>) -> Void) {
-        guard state != .loading else {
-            print("ERROR: Couldnt start loading beceuse it is already started"); return
+    func getConcretePhoto(fromURL url: String?, completion: @escaping (Result<Data, Error>) -> Void) {
+        guard let url = url else {
+            print("ERROR: Couldnt get url"); return
         }
         state = .loading
         

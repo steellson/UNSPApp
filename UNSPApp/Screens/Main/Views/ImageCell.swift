@@ -22,7 +22,6 @@ final class ImageCell: BaseCell {
         return iv
     }()
     
-    
     func configureCell(withImage image: UIImage) {
         self.imageView.image = image
     }
@@ -35,12 +34,17 @@ extension ImageCell {
     
     override func setupCell() {
         super.setupCell()
-        
+        contentView.backgroundColor = .systemBackground.withAlphaComponent(0.8)
+        contentView.layer.borderColor = UIColor.systemGray.cgColor
+        contentView.layer.borderWidth = 0.4
         contentView.addNewSubview(imageView)
     }
     
     override func setupCellLayout() {
         super.setupCellLayout()
         
+        imageView.snp.makeConstraints {
+            $0.edges.equalToSuperview()
+        }
     }
 }
