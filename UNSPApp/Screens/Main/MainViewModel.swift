@@ -21,7 +21,7 @@ enum MainViewModelState {
 protocol MainViewModelProtocol: AnyObject {
     var state: MainViewModelState { get }
     var photos: [Photo] { get }
-    
+
     func getAllPhotos()
     func getConcretePhoto(fromURL url: String?, completion: @escaping (Result<Data, Error>) -> Void)
 }
@@ -53,7 +53,7 @@ final class MainViewModel {
     ) {
         self.apiService = apiService
         
-//        #warning("need uncommit after layout configurating")
+//        #warning("Data fetching is turned off")
         getAllPhotos()
     }
 }
@@ -68,16 +68,17 @@ extension MainViewModel: MainViewModelProtocol {
         }
         
         photos = []
-        state = .loading
+        
+        if state != .loading {
+            state = .loading
+        }
         
         apiService.fetchPhotos { [weak self] result in
             DispatchQueue.main.async {
                 switch result {
                 case .success(let photos):
                     self?.photos = photos
-                    
                     self?.state = .normal
-                    
                 case .failure(let error):
                     print(error.localizedDescription)
                     self?.photos = []
@@ -92,8 +93,11 @@ extension MainViewModel: MainViewModelProtocol {
         guard let url = url else {
             print("ERROR: Couldnt get url"); return
         }
-        state = .loading
         
+        if state != .loading {
+            state = .loading
+        }
+
         apiService.downloadPhoto(fromURL: url) { [weak self] result in
             DispatchQueue.main.async {
                 switch result {

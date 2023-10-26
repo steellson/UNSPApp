@@ -51,7 +51,6 @@ final class MainViewController: BaseController {
         let cv = UICollectionView(frame: .zero, collectionViewLayout: flowLayout)
         cv.backgroundColor = .systemBackground.withAlphaComponent(0.5)
         cv.showsVerticalScrollIndicator = false
-        cv.dataSource = dataSource
         cv.delegate = self
         cv.register(ImageCell.self, forCellWithReuseIdentifier: ImageCell.imageCellIdentifier)
         return cv
@@ -113,7 +112,7 @@ private extension MainViewController {
                     print("ERROR: Couldnt dequeue cell with reuse identifier"); return UICollectionViewCell()
                 }
             
-                self?.viewModel.getConcretePhoto(fromURL: self?.viewModel.photos[indexPath.item].links.download) { result in
+                self?.viewModel.getConcretePhoto(fromURL: itemIdentifier.links.download) { result in
                     switch result {
                     case .success(let imageData):
                         guard let recievedImage = UIImage(data: imageData) else {
