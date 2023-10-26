@@ -39,7 +39,7 @@ final class MainViewModel {
         }
     }
     
-    @Published private(set) var photos = [Photo]() {
+    private(set) var photos = [Photo]() {
         didSet {
             guard !photos.isEmpty else { return }
             print(R.Strings.photoDataSourceUpdated.rawValue)

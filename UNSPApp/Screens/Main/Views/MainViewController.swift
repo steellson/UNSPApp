@@ -30,7 +30,7 @@ final class MainViewController: BaseController {
     private var dataSource: UICollectionViewDiffableDataSource<Section, Photo>!
     
     private var cancellables = Set<AnyCancellable>()
-    
+
     
     init(
         viewModel: MainViewModelProtocol
@@ -43,12 +43,18 @@ final class MainViewController: BaseController {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-        
-    private func makeCollectionView() -> UICollectionView {
+    
+    
+    private func makeFlowLayout() -> UICollectionViewFlowLayout {
         let flowLayout = UICollectionViewFlowLayout()
         flowLayout.scrollDirection = .vertical
+        flowLayout.sectionInset = .init(top: 0, left: 5, bottom: 0, right: 5)
+        flowLayout.estimatedItemSize = UICollectionViewFlowLayout.automaticSize
+        return flowLayout
+    }
         
-        let cv = UICollectionView(frame: .zero, collectionViewLayout: flowLayout)
+    private func makeCollectionView() -> UICollectionView {
+        let cv = UICollectionView(frame: .zero, collectionViewLayout: makeFlowLayout())
         cv.backgroundColor = .systemBackground.withAlphaComponent(0.5)
         cv.showsVerticalScrollIndicator = false
         cv.delegate = self
@@ -111,23 +117,19 @@ private extension MainViewController {
                 ) as? ImageCell else {
                     print("ERROR: Couldnt dequeue cell with reuse identifier"); return UICollectionViewCell()
                 }
-            
+                
                 self?.viewModel.getConcretePhoto(fromURL: itemIdentifier.links.download) { result in
                     switch result {
                     case .success(let imageData):
                         guard let recievedImage = UIImage(data: imageData) else {
-                            print("ERROR: Couldt get recieved image"); 
-                            imageCell.configureCell(withImage: UIImage(systemName: "bandage")!)
-                            return
+                            print("ERROR: Couldt get recieved image"); return
                         }
                         imageCell.configureCell(withImage: recievedImage)
                     case .failure:
-                        guard let systemImage = UIImage(systemName: "bandage") else {
-                            print("ERROR: Couldt get system image"); return
-                        }
-                        imageCell.configureCell(withImage: systemImage)
+                        print("ERROR: Couldnt download image")
                     }
                 }
+  
                 return imageCell
             })
     }
