@@ -13,9 +13,8 @@ class BaseCell: UICollectionViewCell {
         super.init(frame: frame)
         setupCell()
         setupCellLayout()
-        setupCellBindings()
     }
-    
+
     override func prepareForReuse() {
         super.prepareForReuse()
         clearCell()
@@ -33,8 +32,6 @@ class BaseCell: UICollectionViewCell {
     func setupCell() { }
     
     func setupCellLayout() { }
-    
-    func setupCellBindings() { }
-    
+        
     func clearCell() { }
 }
