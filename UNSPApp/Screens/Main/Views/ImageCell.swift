@@ -18,15 +18,18 @@ final class ImageCell: BaseCell {
     private let imageView: UIImageView = {
         let iv = UIImageView()
         iv.clipsToBounds = true
-        iv.contentMode = .scaleAspectFit
+        iv.contentMode = .scaleAspectFill
+        iv.image = UIImage(named: "bandage")
+        iv.tintColor = .black
         return iv
     }()
     
 
     func configureCell(withImage image: UIImage) {
-        self.imageView.image = image
-        
-        contentView.invalidateIntrinsicContentSize()
+        DispatchQueue.main.async { [weak self] in
+            self?.imageView.image = image
+//            self?.contentView.invalidateIntrinsicContentSize()
+        }
     }
 }
 
@@ -50,6 +53,11 @@ extension ImageCell {
         imageView.snp.makeConstraints {
             $0.edges.equalToSuperview()
         }
+    }
+    
+    override func clearCell() {
+        super.clearCell()
+        imageView.image = UIImage(named: "bandage")
     }
 }
 

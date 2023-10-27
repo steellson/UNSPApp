@@ -48,7 +48,10 @@ final class MainViewController: BaseController {
     private func makeFlowLayout() -> UICollectionViewFlowLayout {
         let flowLayout = UICollectionViewFlowLayout()
         flowLayout.scrollDirection = .vertical
-        flowLayout.sectionInset = .init(top: 0, left: 5, bottom: 0, right: 5)
+//        flowLayout.itemSize = CGSize(
+//            width: UIScreen.main.bounds.size.width / 2,
+//            height: .greatestFiniteMagnitude
+//        )
         flowLayout.estimatedItemSize = UICollectionViewFlowLayout.automaticSize
         return flowLayout
     }
@@ -109,7 +112,7 @@ private extension MainViewController {
     func setupDataSource() {
         dataSource = UICollectionViewDiffableDataSource(
             collectionView: collectionView,
-            cellProvider: { [weak self] (collectionView, indexPath, itemIdentifier) -> UICollectionViewCell? in
+            cellProvider: { [weak self] (collectionView, indexPath, photo) -> UICollectionViewCell? in
                 
                 guard let imageCell = collectionView.dequeueReusableCell(
                     withReuseIdentifier: ImageCell.imageCellIdentifier,
@@ -118,7 +121,8 @@ private extension MainViewController {
                     print("ERROR: Couldnt dequeue cell with reuse identifier"); return UICollectionViewCell()
                 }
                 
-                self?.viewModel.getConcretePhoto(fromURL: itemIdentifier.links.download) { result in
+                //MARK: Download image (THUMB)
+                self?.viewModel.getConcretePhoto(fromURL: photo.urls.thumb) { result in
                     switch result {
                     case .success(let imageData):
                         guard let recievedImage = UIImage(data: imageData) else {

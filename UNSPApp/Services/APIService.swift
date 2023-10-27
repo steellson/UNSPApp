@@ -20,7 +20,11 @@ enum APIEndpoints: String {
     case getPhotos = "/photos"
 }
 
-enum HTTPMethod: String {
+enum APISettings: String {
+    case dpr = "&dpr=2"
+}
+
+enum HTTPMethod {
     case GET
     case POST
 }
@@ -61,6 +65,9 @@ extension APIService: APIServiceProtocol {
         
         var request = URLRequest(url: combinedURL)
         request.httpMethod = "GET"
+        request.allHTTPHeaderFields = [
+            "Accept": "v1"
+        ]
         
         urlSession.dataTask(with: request) { data, response, error in
             guard error == nil else {
@@ -80,6 +87,9 @@ extension APIService: APIServiceProtocol {
                 let photos = photoResponseData.map {
                     Photo(
                         id: $0.id,
+                        width: $0.width,
+                        height: $0.height,
+                        urls: $0.urls,
                         links: $0.links
                     )
                 }
@@ -103,6 +113,9 @@ extension APIService: APIServiceProtocol {
         
         var request = URLRequest(url: currentURL)
         request.httpMethod = "GET"
+        request.allHTTPHeaderFields = [
+            "Accept" : "v1"
+        ]
         
         urlSession.dataTask(with: request) { data, response, error in
             guard error == nil else {

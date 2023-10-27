@@ -32,8 +32,8 @@ protocol MainViewModelProtocol: AnyObject {
 final class MainViewModel {
     
     private(set) var state: MainViewModelState = .none {
-        willSet {
-            if newValue != state {
+        didSet {
+            if state != oldValue {
                 print("MainViewModel current state = \(state)")
             }
         }
