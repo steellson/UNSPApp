@@ -48,10 +48,8 @@ final class MainViewController: BaseController {
     private func makeFlowLayout() -> UICollectionViewFlowLayout {
         let flowLayout = UICollectionViewFlowLayout()
         flowLayout.scrollDirection = .vertical
-//        flowLayout.itemSize = CGSize(
-//            width: UIScreen.main.bounds.size.width / 2,
-//            height: .greatestFiniteMagnitude
-//        )
+        flowLayout.minimumLineSpacing = 0
+        flowLayout.minimumInteritemSpacing = 0
         flowLayout.estimatedItemSize = UICollectionViewFlowLayout.automaticSize
         return flowLayout
     }
@@ -61,6 +59,8 @@ final class MainViewController: BaseController {
         cv.backgroundColor = .systemBackground.withAlphaComponent(0.5)
         cv.showsVerticalScrollIndicator = false
         cv.delegate = self
+        cv.prefetchDataSource = self
+        cv.isPrefetchingEnabled = true
         cv.register(ImageCell.self, forCellWithReuseIdentifier: ImageCell.imageCellIdentifier)
         return cv
     }
@@ -133,6 +133,7 @@ private extension MainViewController {
                         print("ERROR: Couldnt download image")
                     }
                 }
+            
   
                 return imageCell
             })
@@ -147,14 +148,37 @@ private extension MainViewController {
     }
 }
 
-//MARK: - Delegates
+//MARK: - Delegate
 
 extension MainViewController: UICollectionViewDelegate {
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         print("Selected: \(indexPath.item)")
     }
+    
+    func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+        if indexPath.item == (viewModel.photos.count - 2) {
+            viewModel.getAllPhotos()
+        }
+    }
 }
+
+//MARK: - Prefetching
+
+extension MainViewController: UICollectionViewDataSourcePrefetching {
+    
+    func collectionView(_ collectionView: UICollectionView, prefetchItemsAt indexPaths: [IndexPath]) {
+        indexPaths.forEach {
+            if $0.item >= (viewModel.photos.count - 3) {
+                viewModel.getAllPhotos()
+                DispatchQueue.main.async {
+                    collectionView.reloadData()
+                }
+            }
+        }
+    }
+}
+
 
 //MARK: - Bindings
 

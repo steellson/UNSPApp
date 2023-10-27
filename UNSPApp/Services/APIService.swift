@@ -10,6 +10,9 @@ import Foundation
 //MARK: - Protocol
 
 protocol APIServiceProtocol: AnyObject {
+    var perPage: Int { get set }
+    var currentPage: Int { get set }
+    
     func fetchPhotos(completion: @escaping (Result<[Photo], RequestError>) -> Void)
     func downloadPhoto(fromURL url: String, completion: @escaping (Result<Data, RequestError>) -> Void)
 }
@@ -18,10 +21,6 @@ protocol APIServiceProtocol: AnyObject {
 
 enum APIEndpoints: String {
     case getPhotos = "/photos"
-}
-
-enum APISettings: String {
-    case dpr = "&dpr=2"
 }
 
 enum HTTPMethod {
@@ -49,14 +48,21 @@ final class APIService {
     private let urlSession = URLSession(configuration: URLSessionConfiguration.default)
     private let jsonDecoder = JSONDecoder()
     
+    var perPage: Int = 30
+    var currentPage: Int = 1
 }
 
 extension APIService: APIServiceProtocol {
     
     //MARK:  Get all photos
     func fetchPhotos(completion: @escaping (Result<[Photo], RequestError>) -> Void) {
+        
+        let clientIdParameter = "?client_id=\(client.clientID)"
+        let perPageParameter = "&per_page=\(perPage)"
+        let currentPageParameter = "&page=\(currentPage)"
+        
         guard let combinedURL = URL(
-            string: baseUrlString + endpoint + "?client_id=\(client.clientID)"
+            string: baseUrlString + endpoint + clientIdParameter + perPageParameter + currentPageParameter
         ) else {
             print("ERROR: Coudlt combine URL")
             completion(.failure(.urlError))
@@ -69,7 +75,7 @@ extension APIService: APIServiceProtocol {
             "Accept": "v1"
         ]
         
-        urlSession.dataTask(with: request) { data, response, error in
+        urlSession.dataTask(with: request) { [weak self] data, response, error in
             guard error == nil else {
                 print("ERROR: Request error \(String(describing: error))")
                 completion(.failure(.requestError))
@@ -83,7 +89,9 @@ extension APIService: APIServiceProtocol {
             }
             
             do {
-                let photoResponseData = try self.jsonDecoder.decode(GetPhotosResponse.self, from: data)
+                guard let photoResponseData = try self?.jsonDecoder.decode(GetPhotosResponse.self, from: data) else {
+                    print("ERROR: Couldnt decode photoResponseData"); return
+                }
                 let photos = photoResponseData.map {
                     Photo(
                         id: $0.id,
@@ -94,6 +102,7 @@ extension APIService: APIServiceProtocol {
                     )
                 }
                 completion(.success(photos))
+                self?.currentPage += 1
                 print(R.Strings.photosFetched.rawValue)
             } catch {
                 completion(.failure(.decodingError))

@@ -63,9 +63,9 @@ final class MainViewModel {
 extension MainViewModel: MainViewModelProtocol {
     
     func getAllPhotos() {
-        guard state != .loading else {
-            print("ERROR: Couldnt start loading beceuse it is already started"); return
-        }
+//        guard state != .loading else {
+//            print("ERROR: Couldnt start loading beceuse it is already started"); return
+//        }
         
         photos = []
         
@@ -77,13 +77,12 @@ extension MainViewModel: MainViewModelProtocol {
             DispatchQueue.main.async {
                 switch result {
                 case .success(let photos):
-                    self?.photos = photos
+                    self?.photos = photos.sorted { $0.height < $1.height }
                     self?.state = .normal
                 case .failure(let error):
                     print(error.localizedDescription)
                     self?.photos = []
-                    self?.state = .error
-                    
+                    self?.state = .error                    
                 }
             }
         }
