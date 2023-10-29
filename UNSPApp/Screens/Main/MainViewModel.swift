@@ -21,6 +21,8 @@ enum MainViewModelState {
 protocol MainViewModelProtocol: AnyObject {
     var state: MainViewModelState { get }
     var photos: [Photo] { get }
+    
+    var paginationArguments: PaginationArguments { get set }
 
     func getAllPhotos()
     func getConcretePhoto(fromURL url: String?, completion: @escaping (Result<Data, Error>) -> Void)
@@ -30,6 +32,8 @@ protocol MainViewModelProtocol: AnyObject {
 //MARK: - Impl
 
 final class MainViewModel {
+    
+    var paginationArguments = PaginationArguments(perPage: 10, currentPage: 1)
     
     private(set) var state: MainViewModelState = .none {
         didSet {
@@ -45,6 +49,7 @@ final class MainViewModel {
             print(R.Strings.photoDataSourceUpdated.rawValue)
         }
     }
+    
     
     private let apiService: APIServiceProtocol
     
@@ -63,21 +68,17 @@ final class MainViewModel {
 extension MainViewModel: MainViewModelProtocol {
     
     func getAllPhotos() {
-//        guard state != .loading else {
-//            print("ERROR: Couldnt start loading beceuse it is already started"); return
-//        }
-        
-        photos = []
         
         if state != .loading {
             state = .loading
         }
-        
-        apiService.fetchPhotos { [weak self] result in
+        print("Loading photos from page: \(paginationArguments.currentPage)")
+
+        apiService.fetchPhotos(withParameters: paginationArguments) { [weak self] result in
             DispatchQueue.main.async {
                 switch result {
                 case .success(let photos):
-                    self?.photos = photos.sorted { $0.height < $1.height }
+                    self?.photos += photos.sorted { $0.height < $1.height }
                     self?.state = .normal
                 case .failure(let error):
                     print(error.localizedDescription)
