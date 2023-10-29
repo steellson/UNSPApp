@@ -133,8 +133,7 @@ private extension MainViewController {
                         print("ERROR: Couldnt download image")
                     }
                 }
-            
-  
+        
                 return imageCell
             })
     }
@@ -153,11 +152,13 @@ private extension MainViewController {
 extension MainViewController: UICollectionViewDelegate {
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        print("Selected: \(indexPath.item)")
+        print("Selected: \(indexPath.item) / collection reloaded")
+        collectionView.reloadData()
     }
     
     func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
         if indexPath.item == (viewModel.photos.count - 2) {
+            viewModel.paginationArguments.currentPage += 1
             viewModel.getAllPhotos()
         }
     }
@@ -170,10 +171,8 @@ extension MainViewController: UICollectionViewDataSourcePrefetching {
     func collectionView(_ collectionView: UICollectionView, prefetchItemsAt indexPaths: [IndexPath]) {
         indexPaths.forEach {
             if $0.item >= (viewModel.photos.count - 3) {
+                viewModel.paginationArguments.currentPage += 1
                 viewModel.getAllPhotos()
-                DispatchQueue.main.async {
-                    collectionView.reloadData()
-                }
             }
         }
     }
