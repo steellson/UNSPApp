@@ -48,7 +48,8 @@ final class MainViewController: BaseController {
     private func makeFlowLayout() -> UICollectionViewFlowLayout {
         let flowLayout = UICollectionViewFlowLayout()
         flowLayout.scrollDirection = .vertical
-        flowLayout.sectionInset = .init(top: 0, left: 5, bottom: 0, right: 5)
+        flowLayout.minimumLineSpacing = 0
+        flowLayout.minimumInteritemSpacing = 0
         flowLayout.estimatedItemSize = UICollectionViewFlowLayout.automaticSize
         return flowLayout
     }
@@ -58,6 +59,8 @@ final class MainViewController: BaseController {
         cv.backgroundColor = .systemBackground.withAlphaComponent(0.5)
         cv.showsVerticalScrollIndicator = false
         cv.delegate = self
+        cv.prefetchDataSource = self
+        cv.isPrefetchingEnabled = true
         cv.register(ImageCell.self, forCellWithReuseIdentifier: ImageCell.imageCellIdentifier)
         return cv
     }
@@ -109,7 +112,7 @@ private extension MainViewController {
     func setupDataSource() {
         dataSource = UICollectionViewDiffableDataSource(
             collectionView: collectionView,
-            cellProvider: { [weak self] (collectionView, indexPath, itemIdentifier) -> UICollectionViewCell? in
+            cellProvider: { [weak self] (collectionView, indexPath, photo) -> UICollectionViewCell? in
                 
                 guard let imageCell = collectionView.dequeueReusableCell(
                     withReuseIdentifier: ImageCell.imageCellIdentifier,
@@ -118,7 +121,8 @@ private extension MainViewController {
                     print("ERROR: Couldnt dequeue cell with reuse identifier"); return UICollectionViewCell()
                 }
                 
-                self?.viewModel.getConcretePhoto(fromURL: itemIdentifier.links.download) { result in
+                //MARK: Download image (THUMB)
+                self?.viewModel.getConcretePhoto(fromURL: photo.urls.thumb) { result in
                     switch result {
                     case .success(let imageData):
                         guard let recievedImage = UIImage(data: imageData) else {
@@ -129,7 +133,7 @@ private extension MainViewController {
                         print("ERROR: Couldnt download image")
                     }
                 }
-  
+        
                 return imageCell
             })
     }
@@ -143,14 +147,37 @@ private extension MainViewController {
     }
 }
 
-//MARK: - Delegates
+//MARK: - Delegate
 
 extension MainViewController: UICollectionViewDelegate {
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        print("Selected: \(indexPath.item)")
+        print("Selected: \(indexPath.item) / collection reloaded")
+        collectionView.reloadData()
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+        if indexPath.item == (viewModel.photos.count - 2) {
+            viewModel.paginationArguments.currentPage += 1
+            viewModel.getAllPhotos()
+        }
     }
 }
+
+//MARK: - Prefetching
+
+extension MainViewController: UICollectionViewDataSourcePrefetching {
+    
+    func collectionView(_ collectionView: UICollectionView, prefetchItemsAt indexPaths: [IndexPath]) {
+        indexPaths.forEach {
+            if $0.item >= (viewModel.photos.count - 3) {
+                viewModel.paginationArguments.currentPage += 1
+                viewModel.getAllPhotos()
+            }
+        }
+    }
+}
+
 
 //MARK: - Bindings
 

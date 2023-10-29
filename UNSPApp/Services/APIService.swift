@@ -10,15 +10,16 @@ import Foundation
 //MARK: - Protocol
 
 protocol APIServiceProtocol: AnyObject {
-    func fetchPhotos(completion: @escaping (Result<[Photo], RequestError>) -> Void)
-    func downloadPhoto(fromURL url: String, completion: @escaping (Result<Data, RequestError>) -> Void)
+    func fetchPhotos(withParameters
+                     parameters: PaginationArguments,
+                     completion: @escaping (Result<[Photo], RequestError>) -> Void)
+    
+    func downloadPhoto(fromURL
+                       url: String,
+                       completion: @escaping (Result<Data, RequestError>) -> Void)
 }
 
 //MARK: - Selections
-
-enum APIEndpoints: String {
-    case getPhotos = "/photos"
-}
 
 enum HTTPMethod: String {
     case GET
@@ -37,32 +38,45 @@ enum RequestError: Error {
 
 final class APIService {
     
-    private let baseUrlString: String = R.Strings.baseUrlString.rawValue
-    private let endpoint = APIEndpoints.getPhotos.rawValue
-    
     private let client = Client(clientID: R.Strings.apiAccessKey.rawValue)
     
     private let urlSession = URLSession(configuration: URLSessionConfiguration.default)
     private let jsonDecoder = JSONDecoder()
-    
 }
 
 extension APIService: APIServiceProtocol {
     
     //MARK:  Get all photos
-    func fetchPhotos(completion: @escaping (Result<[Photo], RequestError>) -> Void) {
-        guard let combinedURL = URL(
-            string: baseUrlString + endpoint + "?client_id=\(client.clientID)"
+    func fetchPhotos(withParameters
+                     parameters: PaginationArguments,
+                     completion: @escaping (Result<[Photo], RequestError>) -> Void) {
+                
+        guard let url = URLBuilder.buildURL(
+            with: .https,
+            host: .main,
+            path: .getPhotos,
+            queryItems: [
+                .init(
+                    name: PaginationArguments.ArgumentNames.page.rawValue,
+                    value: "\(parameters.currentPage)"
+                ),
+                .init(
+                    name: PaginationArguments.ArgumentNames.per_page.rawValue,
+                    value: "\(parameters.perPage)"
+                )
+            ]
         ) else {
-            print("ERROR: Coudlt combine URL")
-            completion(.failure(.urlError))
-            return
+            print("ERROR: Couldnt build URL"); return
         }
+  
+        var request = URLRequest(url: url)
+        request.httpMethod = HTTPMethod.GET.rawValue
+        request.allHTTPHeaderFields = [
+            "Accept": "v1",
+            "Authorization": "Client-ID \(client.clientID)"
+        ]
         
-        var request = URLRequest(url: combinedURL)
-        request.httpMethod = "GET"
-        
-        urlSession.dataTask(with: request) { data, response, error in
+        urlSession.dataTask(with: request) { [weak self] data, response, error in
             guard error == nil else {
                 print("ERROR: Request error \(String(describing: error))")
                 completion(.failure(.requestError))
@@ -76,10 +90,15 @@ extension APIService: APIServiceProtocol {
             }
             
             do {
-                let photoResponseData = try self.jsonDecoder.decode(GetPhotosResponse.self, from: data)
+                guard let photoResponseData = try self?.jsonDecoder.decode(GetPhotosResponse.self, from: data) else {
+                    print("ERROR: Couldnt decode photoResponseData"); return
+                }
                 let photos = photoResponseData.map {
                     Photo(
                         id: $0.id,
+                        width: $0.width,
+                        height: $0.height,
+                        urls: $0.urls,
                         links: $0.links
                     )
                 }
@@ -95,14 +114,17 @@ extension APIService: APIServiceProtocol {
     
     //MARK: Get concrete photo
     func downloadPhoto(fromURL url: String, completion: @escaping (Result<Data, RequestError>) -> Void) {
-        guard let currentURL = URL(string: url) else {
-            print("ERROR: Coudlt get URL")
-            completion(.failure(.urlError))
-            return
+        
+        guard let url = URL(string: url) else {
+            print("ERROR: Failed recieved URL"); return
         }
         
-        var request = URLRequest(url: currentURL)
+        var request = URLRequest(url: url)
         request.httpMethod = "GET"
+        request.allHTTPHeaderFields = [
+            "Accept" : "v1",
+            "Authorization": "Client-ID \(client.clientID)"
+        ]
         
         urlSession.dataTask(with: request) { data, response, error in
             guard error == nil else {
@@ -118,7 +140,7 @@ extension APIService: APIServiceProtocol {
             }
             completion(.success(data))
             print(R.Strings.photoFetched.rawValue)
-
+            
         }.resume()
     }
 }

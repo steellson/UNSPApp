@@ -14,7 +14,7 @@ class BaseCell: UICollectionViewCell {
         setupCell()
         setupCellLayout()
     }
-
+    
     override func prepareForReuse() {
         super.prepareForReuse()
         clearCell()
