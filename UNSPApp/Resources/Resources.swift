@@ -19,6 +19,9 @@ enum R {
         // Title strings
         case mainScreenTitle = "Pick some image for details ..."
         
+        // Placeholders
+        case searchBarPlaceholder = "Find images here ..."
+
         // API
         case apiAccessKey = "JhHk7WPduzX_0Mn0aaJ8qjU4ZQzdGc5-Q7y4388lhk8"
         case baseUrlString = "https://api.unsplash.com"
@@ -29,6 +32,7 @@ enum R {
         // Log messages
         case photosFetched = "SUCCESS: Photos fetched succsessfully!"
         case photoFetched = "SUCCESS: Photo downloaded succsessfully!"
+        case photosSearched = "SUCCESS: Some photos searched!"
         case photoDataSourceUpdated = "--- MainViewModel photos data updated! ---"
     }
     

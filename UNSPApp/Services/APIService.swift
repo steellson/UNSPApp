@@ -11,12 +11,16 @@ import Foundation
 
 protocol APIServiceProtocol: AnyObject {
     func fetchPhotos(withParameters
-                     parameters: PaginationArguments,
+                     parameters: QueryArguments,
                      completion: @escaping (Result<[Photo], RequestError>) -> Void)
     
     func downloadPhoto(fromURL
                        url: String,
                        completion: @escaping (Result<Data, RequestError>) -> Void)
+    
+    func searchPhoto(withText
+                 text: String,
+                 completion: @escaping (Result<[Photo], RequestError>) -> Void)
 }
 
 //MARK: - Selections
@@ -31,6 +35,7 @@ enum RequestError: Error {
     case decodingError
     case requestError
     case noData
+    case searchError
 }
 
 
@@ -48,7 +53,7 @@ extension APIService: APIServiceProtocol {
     
     //MARK:  Get all photos
     func fetchPhotos(withParameters
-                     parameters: PaginationArguments,
+                     parameters: QueryArguments,
                      completion: @escaping (Result<[Photo], RequestError>) -> Void) {
                 
         guard let url = URLBuilder.buildURL(
@@ -57,11 +62,11 @@ extension APIService: APIServiceProtocol {
             path: .getPhotos,
             queryItems: [
                 .init(
-                    name: PaginationArguments.ArgumentNames.page.rawValue,
+                    name: QueryArguments.ArgumentNames.page.rawValue,
                     value: "\(parameters.currentPage)"
                 ),
                 .init(
-                    name: PaginationArguments.ArgumentNames.per_page.rawValue,
+                    name: QueryArguments.ArgumentNames.per_page.rawValue,
                     value: "\(parameters.perPage)"
                 )
             ]
@@ -140,6 +145,71 @@ extension APIService: APIServiceProtocol {
             }
             completion(.success(data))
             print(R.Strings.photoFetched.rawValue)
+            
+        }.resume()
+    }
+    
+    //MARK: Search with text
+    func searchPhoto(withText text: String, completion: @escaping (Result<[Photo], RequestError>) -> Void) {
+        
+        let itemsPerPageValue = 20
+        
+        guard let url = URLBuilder.buildURL(
+            with: .https,
+            host: .main,
+            path: .getPhotos,
+            queryItems: [
+                .init(
+                    name: QueryArguments.ArgumentNames.per_page.rawValue,
+                    value: String(itemsPerPageValue)
+                     ),
+                .init(
+                    name: QueryArguments.ArgumentNames.query.rawValue,
+                    value: text
+                )
+            ]
+        ) else {
+            print("ERROR: Couldnt build URL"); return
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.allHTTPHeaderFields = [
+            "Accept" : "v1",
+            "Authorization": "Client-ID \(client.clientID)"
+        ]
+
+        urlSession.dataTask(with: request) { [weak self] data, response, error in
+            guard error == nil else {
+                print("ERROR: Search failed \(String(describing: error))")
+                completion(.failure(.searchError))
+                return
+            }
+            
+            guard let data = data else {
+                print("ERROR: Couldnt get data \(String(describing: error))")
+                completion(.failure(.noData))
+                return
+            }
+            
+            do {
+                guard let photoResponseData = try self?.jsonDecoder.decode(GetPhotosResponse.self, from: data) else {
+                    print("ERROR: Couldnt decode photoResponseData"); return
+                }
+                let photos = photoResponseData.map {
+                    Photo(
+                        id: $0.id,
+                        width: $0.width,
+                        height: $0.height,
+                        urls: $0.urls,
+                        links: $0.links
+                    )
+                }
+                completion(.success(photos))
+            } catch {
+                completion(.failure(.decodingError))
+                print("ERROR: Decoding images promlem \(error)")
+            }
             
         }.resume()
     }

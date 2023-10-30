@@ -21,11 +21,11 @@ enum MainViewModelState {
 protocol MainViewModelProtocol: AnyObject {
     var state: MainViewModelState { get }
     var photos: [Photo] { get }
-    
-    var paginationArguments: PaginationArguments { get set }
+    var paginationArguments: QueryArguments { get set }
 
     func getAllPhotos()
     func getConcretePhoto(fromURL url: String?, completion: @escaping (Result<Data, Error>) -> Void)
+    func searchPhotos(withText text: String)
 }
 
 
@@ -33,7 +33,7 @@ protocol MainViewModelProtocol: AnyObject {
 
 final class MainViewModel {
     
-    var paginationArguments = PaginationArguments(perPage: 10, currentPage: 1)
+    var paginationArguments = QueryArguments(perPage: 10, currentPage: 1)
     
     private(set) var state: MainViewModelState = .none {
         didSet {
@@ -109,6 +109,25 @@ extension MainViewModel: MainViewModelProtocol {
                     completion(.failure(error))
                     self?.state = .error
                 }
+            }
+        }
+    }
+    
+    func searchPhotos(withText text: String) {
+        guard !text.isEmpty, text.count > 1 else { return }
+        
+        if state != .loading {
+            state = .loading
+        }
+        
+        apiService.searchPhoto(withText: text) { [weak self] result in
+            switch result {
+            case .success(let photos):
+                self?.photos = photos
+                self?.state = .normal
+            case .failure(let error):
+                print(error.localizedDescription)
+                self?.state = .error
             }
         }
     }

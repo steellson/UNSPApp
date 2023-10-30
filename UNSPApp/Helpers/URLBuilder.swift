@@ -20,15 +20,18 @@ enum APIPath: String {
     case getPhotos = "/photos"
 }
 
-struct PaginationArguments {
+struct QueryArguments {
     
     enum ArgumentNames: String {
         case per_page
         case page
+        case query
     }
     
     var perPage: Int
     var currentPage: Int
+    
+    var queryText: String?
 }
 
 struct URLBuilder {
