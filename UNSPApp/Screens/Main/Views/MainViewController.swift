@@ -15,18 +15,10 @@ final class MainViewController: BaseController {
     
     private var viewModel: MainViewModelProtocol
     
-    private let titleLabel: UILabel = {
-        let label = UILabel()
-        label.font = .systemFont(ofSize: 26, weight: .semibold)
-        label.textAlignment = .left
-        label.text = R.Strings.mainScreenTitle.rawValue
-        label.shadowColor = .gray
-        label.shadowOffset = .init(width: 0.5, height: 1)
-        return label
-    }()
-    
+    private let titleLabel = UILabel()
+    private let searchController = UISearchController()
     private lazy var collectionView = makeCollectionView()
-    
+
     private var dataSource: UICollectionViewDiffableDataSource<Section, Photo>!
     
     private var cancellables = Set<AnyCancellable>()
@@ -44,6 +36,27 @@ final class MainViewController: BaseController {
         fatalError("init(coder:) has not been implemented")
     }
     
+    private func setupTitleLabel() {
+        titleLabel.text = R.Strings.mainScreenTitle.rawValue
+        titleLabel.font = .systemFont(ofSize: 22, weight: .semibold)
+        titleLabel.textAlignment = .left
+        titleLabel.shadowColor = .gray
+        titleLabel.shadowOffset = .init(width: 0.5, height: 1)
+    }
+    
+    private func setupSearchController() {
+        searchController.searchBar.placeholder = R.Strings.searchBarPlaceholder.rawValue
+        searchController.searchBar.searchTextField.backgroundColor = .white.withAlphaComponent(0.5)
+        searchController.searchBar.tintColor = .black
+        searchController.searchBar.autocapitalizationType = .none
+        searchController.searchBar.autocorrectionType = .no
+        searchController.searchBar.searchBarStyle = .minimal
+        searchController.searchResultsUpdater = self
+        searchController.obscuresBackgroundDuringPresentation = false
+        
+        let searchResultController = searchController.searchResultsController
+        searchResultController?.view.backgroundColor = R.Colors.primaryBackgroundColor
+    }
     
     private func makeFlowLayout() -> UICollectionViewFlowLayout {
         let flowLayout = UICollectionViewFlowLayout()
@@ -56,7 +69,9 @@ final class MainViewController: BaseController {
         
     private func makeCollectionView() -> UICollectionView {
         let cv = UICollectionView(frame: .zero, collectionViewLayout: makeFlowLayout())
+        cv.layer.cornerRadius = 10
         cv.backgroundColor = .systemBackground.withAlphaComponent(0.5)
+        cv.contentInsetAdjustmentBehavior = .never
         cv.showsVerticalScrollIndicator = false
         cv.delegate = self
         cv.prefetchDataSource = self
@@ -74,33 +89,29 @@ extension MainViewController {
     override func setupView() {
         super.setupView()
         setupDataSource()
+        setupTitleLabel()
+        setupSearchController()
+        
         view.addNewSubview(titleLabel)
         view.addNewSubview(collectionView)
     }
     
+    override func setupNavBar() {
+        super.setupNavBar()
+        navigationItem.titleView = titleLabel
+        navigationItem.searchController = searchController
+    }
+    
     override func setupLayout() {
         super.setupLayout()
-        
-        guard let screenSize = view.window?.windowScene?.screen.bounds else {
-            print("ERROR: Couldnt get screen size"); return
-        }
-        let topMargin = screenSize.height * 0.01
-        let sideMargins = screenSize.width * 0.02
-        
-        titleLabel.snp.makeConstraints {
-            $0.top.equalTo(view.safeAreaLayoutGuide).inset(topMargin)
-            $0.leading.trailing.equalToSuperview().inset(sideMargins)
-        }
-        
         collectionView.snp.makeConstraints {
-            $0.top.equalTo(titleLabel.snp.bottom).offset(24)
+            $0.top.equalTo(searchController.searchBar.snp.bottom)
             $0.leading.trailing.bottom.equalToSuperview()
         }
     }
     
     override func setupBindings() {
         super.setupBindings()
-        
         bindPhotoCollection()
     }
 }
@@ -174,6 +185,24 @@ extension MainViewController: UICollectionViewDataSourcePrefetching {
                 viewModel.paginationArguments.currentPage += 1
                 viewModel.getAllPhotos()
             }
+        }
+    }
+}
+
+//MARK: - Search
+
+extension MainViewController: UISearchResultsUpdating {
+    
+    func updateSearchResults(for searchController: UISearchController) {
+        guard
+            let searchText = searchController.searchBar.text,
+            !searchText.isEmpty,
+            searchText.count > 1 
+        else { return }
+
+        DispatchQueue.main.async { [weak self] in
+            self?.viewModel.searchPhotos(withText: searchText.trimmingCharacters(in: .whitespacesAndNewlines))
+            self?.collectionView.reloadData()
         }
     }
 }
