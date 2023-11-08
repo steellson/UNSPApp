@@ -24,6 +24,8 @@ final class MainViewController: BaseController {
     private var cancellables = Set<AnyCancellable>()
 
     
+    //MARK: Init
+    
     init(
         viewModel: MainViewModelProtocol
     ) {
@@ -35,6 +37,9 @@ final class MainViewController: BaseController {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+    
+    
+    //MARK: Setup
     
     private func setupTitleLabel() {
         titleLabel.text = R.Strings.mainScreenTitle.rawValue
@@ -58,12 +63,15 @@ final class MainViewController: BaseController {
         searchResultController?.view.backgroundColor = R.Colors.primaryBackgroundColor
     }
     
+    
+    //MARK: Make CV
+    
     private func makeFlowLayout() -> UICollectionViewFlowLayout {
         let flowLayout = UICollectionViewFlowLayout()
         flowLayout.scrollDirection = .vertical
         flowLayout.minimumLineSpacing = 0
         flowLayout.minimumInteritemSpacing = 0
-        flowLayout.estimatedItemSize = UICollectionViewFlowLayout.automaticSize
+//        flowLayout.estimatedItemSize = UICollectionViewFlowLayout.automaticSize
         return flowLayout
     }
         
@@ -78,6 +86,18 @@ final class MainViewController: BaseController {
         cv.isPrefetchingEnabled = true
         cv.register(ImageCell.self, forCellWithReuseIdentifier: ImageCell.imageCellIdentifier)
         return cv
+    }
+    
+    
+    //MARK: - Methods
+    
+    private func calculateCellHeight(ofCollectionViewCell collectionView: UICollectionView,
+                                     indexPath: IndexPath, 
+                                     width: CGFloat) -> CGSize {
+        let imageHeight = CGFloat(viewModel.photos[indexPath.item].height)
+        let height = imageHeight / 30
+        
+        return CGSize(width: width, height: height)
     }
 }
 
@@ -132,8 +152,8 @@ private extension MainViewController {
                     print("ERROR: Couldnt dequeue cell with reuse identifier"); return UICollectionViewCell()
                 }
                 
-                //MARK: Download image (THUMB)
-                self?.viewModel.getConcretePhoto(fromURL: photo.urls.thumb) { result in
+                //MARK: Download image (SMALL)
+                self?.viewModel.getConcretePhoto(fromURL: photo.urls.small) { result in
                     switch result {
                     case .success(let imageData):
                         guard let recievedImage = UIImage(data: imageData) else {
@@ -144,7 +164,6 @@ private extension MainViewController {
                         print("ERROR: Couldnt download image")
                     }
                 }
-        
                 return imageCell
             })
     }
@@ -163,8 +182,8 @@ private extension MainViewController {
 extension MainViewController: UICollectionViewDelegate {
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        print("Selected: \(indexPath.item) / collection reloaded")
-        collectionView.reloadData()
+        print("Selected: \(indexPath.item) / collectionView layout reloaded")
+        collectionView.layoutIfNeeded()
     }
     
     func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
@@ -172,6 +191,14 @@ extension MainViewController: UICollectionViewDelegate {
             viewModel.paginationArguments.currentPage += 1
             viewModel.getAllPhotos()
         }
+    }
+}
+
+extension MainViewController: UICollectionViewDelegateFlowLayout {
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        return calculateCellHeight(ofCollectionViewCell: collectionView,
+                                   indexPath: indexPath,
+                                   width: (UIScreen.main.bounds.size.width / 2) - 0.1) 
     }
 }
 
@@ -202,7 +229,6 @@ extension MainViewController: UISearchResultsUpdating {
 
         DispatchQueue.main.async { [weak self] in
             self?.viewModel.searchPhotos(withText: searchText.trimmingCharacters(in: .whitespacesAndNewlines))
-            self?.collectionView.reloadData()
         }
     }
 }
@@ -222,6 +248,7 @@ private extension MainViewController {
                 DispatchQueue.main.async {
                     self?.updateSnapshot(withPhotos: photos)
                     self?.collectionView.reloadData()
+                    self?.collectionView.layoutIfNeeded()
                 }
             }
             .store(in: &cancellables)

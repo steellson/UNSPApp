@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3D4805D12AFBB2D700EC98A6 /* ResizableImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D4805D02AFBB2D700EC98A6 /* ResizableImageView.swift */; };
 		3D8254FF2AE6A03E00D84FC7 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D8254FE2AE6A03E00D84FC7 /* AppDelegate.swift */; };
 		3D8255012AE6A03E00D84FC7 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D8255002AE6A03E00D84FC7 /* SceneDelegate.swift */; };
 		3D8255032AE6A03E00D84FC7 /* MainViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D8255022AE6A03E00D84FC7 /* MainViewController.swift */; };
@@ -29,6 +30,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		3D4805D02AFBB2D700EC98A6 /* ResizableImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResizableImageView.swift; sourceTree = "<group>"; };
 		3D8254FB2AE6A03E00D84FC7 /* UNSPApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = UNSPApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		3D8254FE2AE6A03E00D84FC7 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		3D8255002AE6A03E00D84FC7 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -154,6 +156,7 @@
 			children = (
 				3D8255022AE6A03E00D84FC7 /* MainViewController.swift */,
 				3D8255392AE909B100D84FC7 /* ImageCell.swift */,
+				3D4805D02AFBB2D700EC98A6 /* ResizableImageView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -278,6 +281,7 @@
 				3D8255322AE7B3AA00D84FC7 /* Client.swift in Sources */,
 				3D8255302AE7A75000D84FC7 /* Photo.swift in Sources */,
 				3D8255382AE7EA6E00D84FC7 /* UIView+Extension.swift in Sources */,
+				3D4805D12AFBB2D700EC98A6 /* ResizableImageView.swift in Sources */,
 				3D8255242AE6B0C900D84FC7 /* BaseView.swift in Sources */,
 				3D8255352AE7B80100D84FC7 /* GetPhotosResponse.swift in Sources */,
 				3D82553E2AE94F7000D84FC7 /* Sections.swift in Sources */,

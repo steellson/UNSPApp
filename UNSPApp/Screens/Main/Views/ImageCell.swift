@@ -23,50 +23,38 @@ final class ImageCell: BaseCell {
         return indicator
     }()
     
-    private let imageView: UIImageView = {
-        let iv = UIImageView()
-        iv.clipsToBounds = true
-        iv.contentMode = .scaleAspectFill
-        iv.image = UIImage(named: "bandage")
-        iv.tintColor = .black
-        return iv
-    }()
+    private let imageView = ResizableImageView(frame: .zero)
     
-    private var imageViewWidth: CGFloat {
-        (UIScreen.main.bounds.size.width / 2) - 0.1
-    }
-    
-//    var hConst: NSLayoutConstraint {
-//        .init(
-//            item: imageView,
-//            attribute: .height,
-//            relatedBy: .equal,
-//            toItem: nil,
-//            attribute: .notAnAttribute,
-//            multiplier: 1,
-//            constant: 10
-//        )
-//    }
 
     func configureCell(withImage image: UIImage) {
         DispatchQueue.main.async { [weak self] in
             self?.imageView.image = image
-            self?.contentView.frame = .init(
-                x: self?.center.x ?? .zero,
-                y: self?.center.y ?? .zero,
-                width: UIScreen.main.bounds.width / 2,
-                height: image.size.height
-            )
-            self?.contentView.invalidateIntrinsicContentSize()
-            
+            self?.imageView.invalidateIntrinsicContentSize()
             self?.setupActivityIndicator()
         }
     }
     
+    
+    //MARK: Setup
+    
+    private func setupContentView() {
+        contentView.backgroundColor = .systemBackground.withAlphaComponent(0.2)
+        contentView.layer.borderColor = UIColor.systemGray.cgColor
+        contentView.layer.borderWidth = 0.5
+        contentView.clipsToBounds = true
+        contentView.layer.masksToBounds = true
+        contentView.addNewSubview(activityIndicator)
+        contentView.addNewSubview(imageView)
+    }
+    
     private func setupActivityIndicator() {
-        imageView.image == nil
-        ? activityIndicator.startAnimating()
-        : activityIndicator.stopAnimating()
+        if imageView.image == nil {
+            activityIndicator.isHidden = false
+            activityIndicator.startAnimating()
+        } else {
+            activityIndicator.isHidden = true
+            activityIndicator.stopAnimating()
+        }
     }
 }
 
@@ -78,13 +66,7 @@ extension ImageCell {
     override func setupCell() {
         super.setupCell()
         setupActivityIndicator()
-        
-        contentView.backgroundColor = .systemBackground.withAlphaComponent(0.2)
-        contentView.layer.borderColor = UIColor.systemGray.cgColor
-        contentView.layer.borderWidth = 0.5
-        
-        contentView.addNewSubview(activityIndicator)
-        contentView.addNewSubview(imageView)
+        setupContentView()
     }
     
     override func setupCellLayout() {
@@ -96,8 +78,7 @@ extension ImageCell {
         }
         
         imageView.snp.makeConstraints {
-            $0.center.top.leading.equalToSuperview()
-            $0.width.equalTo(imageViewWidth)
+            $0.edges.equalToSuperview()
         }
     }
     
