@@ -7,7 +7,6 @@
 
 import Foundation
 import UIKit
-import SnapKit
 
 //MARK: - Impl
 
@@ -25,11 +24,10 @@ final class ImageCell: BaseCell {
     
     private let imageView = ResizableImageView(frame: .zero)
     
-
+    
     func configureCell(withImage image: UIImage) {
         DispatchQueue.main.async { [weak self] in
             self?.imageView.image = image
-            self?.imageView.invalidateIntrinsicContentSize()
             self?.setupActivityIndicator()
         }
     }
@@ -37,14 +35,31 @@ final class ImageCell: BaseCell {
     
     //MARK: Setup
     
+    private func setupFrames() {
+        activityIndicator.frame = CGRect(
+            x: contentView.center.x,
+            y: contentView.center.y,
+            width: 20,
+            height: 20
+        )
+        imageView.frame = CGRect(
+            x: 0,
+            y: 0,
+            width: contentView.frame.width,
+            height: contentView.frame.height
+        )
+    }
+    
     private func setupContentView() {
         contentView.backgroundColor = .systemBackground.withAlphaComponent(0.2)
         contentView.layer.borderColor = UIColor.systemGray.cgColor
         contentView.layer.borderWidth = 0.5
         contentView.clipsToBounds = true
         contentView.layer.masksToBounds = true
-        contentView.addNewSubview(activityIndicator)
-        contentView.addNewSubview(imageView)
+//        contentView.translatesAutoresizingMaskIntoConstraints = false
+        contentView.frame = imageView.bounds
+        contentView.addSubview(activityIndicator)
+        contentView.addSubview(imageView)
     }
     
     private func setupActivityIndicator() {
@@ -57,29 +72,16 @@ final class ImageCell: BaseCell {
         }
     }
 }
-
-
+            
 //MARK: - Base
 
 extension ImageCell {
     
     override func setupCell() {
         super.setupCell()
+        setupFrames()
         setupActivityIndicator()
         setupContentView()
-    }
-    
-    override func setupCellLayout() {
-        super.setupCellLayout()
-        
-        activityIndicator.snp.makeConstraints {
-            $0.center.equalToSuperview()
-            $0.width.height.equalTo(20)
-        }
-        
-        imageView.snp.makeConstraints {
-            $0.edges.equalToSuperview()
-        }
     }
     
     override func clearCell() {

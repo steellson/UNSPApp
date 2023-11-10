@@ -17,7 +17,11 @@ final class MainViewController: BaseController {
     
     private let titleLabel = UILabel()
     private let searchController = UISearchController()
-    private lazy var collectionView = makeCollectionView()
+    
+    private var flowLayout: UICollectionViewFlowLayout {
+        makeFlowLayout()
+    }
+    private lazy var collectionView = makeCollectionView(withLayout: flowLayout)
 
     private var dataSource: UICollectionViewDiffableDataSource<Section, Photo>!
     
@@ -72,11 +76,12 @@ final class MainViewController: BaseController {
         flowLayout.minimumLineSpacing = 0
         flowLayout.minimumInteritemSpacing = 0
 //        flowLayout.estimatedItemSize = UICollectionViewFlowLayout.automaticSize
+        flowLayout.estimatedItemSize = .init(width: 0, height: 0)
         return flowLayout
     }
         
-    private func makeCollectionView() -> UICollectionView {
-        let cv = UICollectionView(frame: .zero, collectionViewLayout: makeFlowLayout())
+    private func makeCollectionView(withLayout layout: UICollectionViewFlowLayout) -> UICollectionView {
+        let cv = UICollectionView(frame: .zero, collectionViewLayout: layout)
         cv.layer.cornerRadius = 10
         cv.backgroundColor = .systemBackground.withAlphaComponent(0.5)
         cv.contentInsetAdjustmentBehavior = .never
@@ -88,11 +93,10 @@ final class MainViewController: BaseController {
         return cv
     }
     
-    
     //MARK: - Methods
     
     private func calculateCellHeight(ofCollectionViewCell collectionView: UICollectionView,
-                                     indexPath: IndexPath, 
+                                     indexPath: IndexPath,
                                      width: CGFloat) -> CGSize {
         let imageHeight = CGFloat(viewModel.photos[indexPath.item].height)
         let height = imageHeight / 30
@@ -182,8 +186,8 @@ private extension MainViewController {
 extension MainViewController: UICollectionViewDelegate {
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        print("Selected: \(indexPath.item) / collectionView layout reloaded")
         collectionView.layoutIfNeeded()
+        print("Selected: \(indexPath.item) / collectionView layout reloaded")
     }
     
     func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
@@ -198,7 +202,7 @@ extension MainViewController: UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         return calculateCellHeight(ofCollectionViewCell: collectionView,
                                    indexPath: indexPath,
-                                   width: (UIScreen.main.bounds.size.width / 2) - 0.1) 
+                                   width: (UIScreen.main.bounds.size.width / 2) - 0.1)
     }
 }
 
@@ -247,8 +251,9 @@ private extension MainViewController {
             .sink { [weak self] photos in
                 DispatchQueue.main.async {
                     self?.updateSnapshot(withPhotos: photos)
+//                    self?.collectionView.collectionViewLayout.invalidateLayout()
                     self?.collectionView.reloadData()
-                    self?.collectionView.layoutIfNeeded()
+//                    self?.collectionView.layoutIfNeeded()
                 }
             }
             .store(in: &cancellables)

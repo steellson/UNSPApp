@@ -19,6 +19,7 @@ final class ResizableImageView: UIImageView {
         return .init(width: width,height: height)
     }
     
+    
     //MARK: Init
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -35,7 +36,7 @@ final class ResizableImageView: UIImageView {
     private func setupImageView() {
         clipsToBounds = true
         layer.masksToBounds = true
-        contentMode = .scaleAspectFit
+        contentMode = .scaleAspectFill
         tintColor = .black
     }
 }
