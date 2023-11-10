@@ -18,10 +18,10 @@ final class MainViewController: BaseController {
     private let titleLabel = UILabel()
     private let searchController = UISearchController()
     
-    private var flowLayout: UICollectionViewFlowLayout {
-        makeFlowLayout()
+    private var collectionViewLayout: UICollectionViewCompositionalLayout {
+        makeCollectionViewLayout()
     }
-    private lazy var collectionView = makeCollectionView(withLayout: flowLayout)
+    private lazy var collectionView = makeCollectionView(withLayout: collectionViewLayout)
 
     private var dataSource: UICollectionViewDiffableDataSource<Section, Photo>!
     
@@ -70,20 +70,33 @@ final class MainViewController: BaseController {
     
     //MARK: Make CV
     
-    private func makeFlowLayout() -> UICollectionViewFlowLayout {
-        let flowLayout = UICollectionViewFlowLayout()
-        flowLayout.scrollDirection = .vertical
-        flowLayout.minimumLineSpacing = 0
-        flowLayout.minimumInteritemSpacing = 0
-//        flowLayout.estimatedItemSize = UICollectionViewFlowLayout.automaticSize
-        flowLayout.estimatedItemSize = .init(width: 0, height: 0)
-        return flowLayout
+    private func makeCollectionViewLayout() -> UICollectionViewCompositionalLayout {
+        // Item
+        let item = NSCollectionLayoutItem(layoutSize: .init(
+            widthDimension: .fractionalWidth(0.5),
+            heightDimension: .fractionalHeight(1)
+        ))
+        item.contentInsets = .init(top: 0, leading: 0, bottom: 0, trailing: 0)
+        
+        // Group
+        let group = NSCollectionLayoutGroup.horizontal(layoutSize: .init(
+            widthDimension: .fractionalWidth(1),
+            heightDimension: .fractionalHeight(2/5)
+        ),  subitems: [item])
+        group.interItemSpacing = .none
+        group.edgeSpacing = .none
+        
+        // Section
+        let section = NSCollectionLayoutSection(group: group)
+        section.contentInsets = .zero
+        
+        return UICollectionViewCompositionalLayout(section: section)
     }
         
-    private func makeCollectionView(withLayout layout: UICollectionViewFlowLayout) -> UICollectionView {
+    private func makeCollectionView(withLayout layout: UICollectionViewCompositionalLayout) -> UICollectionView {
         let cv = UICollectionView(frame: .zero, collectionViewLayout: layout)
         cv.layer.cornerRadius = 10
-        cv.backgroundColor = .systemBackground.withAlphaComponent(0.5)
+        cv.backgroundColor = .clear
         cv.contentInsetAdjustmentBehavior = .never
         cv.showsVerticalScrollIndicator = false
         cv.delegate = self
@@ -91,17 +104,6 @@ final class MainViewController: BaseController {
         cv.isPrefetchingEnabled = true
         cv.register(ImageCell.self, forCellWithReuseIdentifier: ImageCell.imageCellIdentifier)
         return cv
-    }
-    
-    //MARK: - Methods
-    
-    private func calculateCellHeight(ofCollectionViewCell collectionView: UICollectionView,
-                                     indexPath: IndexPath,
-                                     width: CGFloat) -> CGSize {
-        let imageHeight = CGFloat(viewModel.photos[indexPath.item].height)
-        let height = imageHeight / 30
-        
-        return CGSize(width: width, height: height)
     }
 }
 
@@ -156,8 +158,8 @@ private extension MainViewController {
                     print("ERROR: Couldnt dequeue cell with reuse identifier"); return UICollectionViewCell()
                 }
                 
-                //MARK: Download image (SMALL)
-                self?.viewModel.getConcretePhoto(fromURL: photo.urls.small) { result in
+                //MARK: Download image (THUMB)
+                self?.viewModel.getConcretePhoto(fromURL: photo.urls.thumb) { result in
                     switch result {
                     case .success(let imageData):
                         guard let recievedImage = UIImage(data: imageData) else {
@@ -195,14 +197,6 @@ extension MainViewController: UICollectionViewDelegate {
             viewModel.paginationArguments.currentPage += 1
             viewModel.getAllPhotos()
         }
-    }
-}
-
-extension MainViewController: UICollectionViewDelegateFlowLayout {
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        return calculateCellHeight(ofCollectionViewCell: collectionView,
-                                   indexPath: indexPath,
-                                   width: (UIScreen.main.bounds.size.width / 2) - 0.1)
     }
 }
 
@@ -251,9 +245,8 @@ private extension MainViewController {
             .sink { [weak self] photos in
                 DispatchQueue.main.async {
                     self?.updateSnapshot(withPhotos: photos)
-//                    self?.collectionView.collectionViewLayout.invalidateLayout()
                     self?.collectionView.reloadData()
-//                    self?.collectionView.layoutIfNeeded()
+                    self?.collectionView.layoutIfNeeded()
                 }
             }
             .store(in: &cancellables)

@@ -78,7 +78,7 @@ extension MainViewModel: MainViewModelProtocol {
             DispatchQueue.main.async {
                 switch result {
                 case .success(let photos):
-                    self?.photos.append(contentsOf: photos.sorted { $0.height < $1.height })    //maybe +=
+                    self?.photos += photos.sorted { $0.height < $1.height }
                     self?.state = .normal
                 case .failure(let error):
                     print(error.localizedDescription)

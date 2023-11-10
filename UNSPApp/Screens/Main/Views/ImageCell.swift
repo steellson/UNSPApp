@@ -24,6 +24,13 @@ final class ImageCell: BaseCell {
     
     private let imageView = ResizableImageView(frame: .zero)
     
+    public lazy var imageHeight: CGFloat = {
+        guard let image = imageView.image else {
+            print("Couldnt get image height in imageCell!"); return .zero
+        }
+        return image.size.height
+    }()
+    
     
     func configureCell(withImage image: UIImage) {
         DispatchQueue.main.async { [weak self] in
@@ -36,27 +43,21 @@ final class ImageCell: BaseCell {
     //MARK: Setup
     
     private func setupFrames() {
+        imageView.frame = contentView.bounds
         activityIndicator.frame = CGRect(
             x: contentView.center.x,
             y: contentView.center.y,
             width: 20,
             height: 20
         )
-        imageView.frame = CGRect(
-            x: 0,
-            y: 0,
-            width: contentView.frame.width,
-            height: contentView.frame.height
-        )
     }
     
     private func setupContentView() {
-        contentView.backgroundColor = .systemBackground.withAlphaComponent(0.2)
+        contentView.backgroundColor = .systemBackground.withAlphaComponent(0.5)
         contentView.layer.borderColor = UIColor.systemGray.cgColor
         contentView.layer.borderWidth = 0.5
         contentView.clipsToBounds = true
         contentView.layer.masksToBounds = true
-//        contentView.translatesAutoresizingMaskIntoConstraints = false
         contentView.frame = imageView.bounds
         contentView.addSubview(activityIndicator)
         contentView.addSubview(imageView)

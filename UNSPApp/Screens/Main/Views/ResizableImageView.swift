@@ -9,15 +9,15 @@ import UIKit
 
 final class ResizableImageView: UIImageView {
     
-    //MARK: Resizability
-    override var intrinsicContentSize: CGSize {
-        guard let image else { return .zero }
-        
-        let width = (frame.size.height / image.size.height) * image.size.width
-        let height = (frame.size.height / image.size.height) * image.size.height
-        
-        return .init(width: width,height: height)
-    }
+//    //MARK: Resizability
+//    override var intrinsicContentSize: CGSize {
+//        guard let image else { return .zero }
+//        
+//        let width = (UIScreen.main.bounds.width / 2) - 0.1
+//        let height = (frame.size.height / image.size.height) * image.size.height
+//        
+//        return .init(width: width,height: height)
+//    }
     
     
     //MARK: Init
