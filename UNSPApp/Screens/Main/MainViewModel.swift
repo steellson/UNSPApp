@@ -50,7 +50,6 @@ final class MainViewModel {
         }
     }
     
-    
     private let apiService: APIServiceProtocol
     
     init(
@@ -75,17 +74,15 @@ extension MainViewModel: MainViewModelProtocol {
         print("Loading photos from page: \(paginationArguments.currentPage)")
 
         apiService.fetchPhotos(withParameters: paginationArguments) { [weak self] result in
-            DispatchQueue.main.async {
                 switch result {
                 case .success(let photos):
-                    self?.photos += photos.sorted { $0.height < $1.height }
+                    self?.photos += photos.sorted(by: { $0.height < $1.height })
                     self?.state = .normal
                 case .failure(let error):
                     print(error.localizedDescription)
                     self?.photos = []
                     self?.state = .error                    
                 }
-            }
         }
     }
     
@@ -99,7 +96,6 @@ extension MainViewModel: MainViewModelProtocol {
         }
 
         apiService.downloadPhoto(fromURL: url) { [weak self] result in
-            DispatchQueue.main.async {
                 switch result {
                 case .success(let data):
                     completion(.success(data))
@@ -109,7 +105,6 @@ extension MainViewModel: MainViewModelProtocol {
                     completion(.failure(error))
                     self?.state = .error
                 }
-            }
         }
     }
     

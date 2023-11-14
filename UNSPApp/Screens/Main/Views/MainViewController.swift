@@ -18,10 +18,8 @@ final class MainViewController: BaseController {
     private let titleLabel = UILabel()
     private let searchController = UISearchController()
     
-    private var collectionViewLayout: UICollectionViewCompositionalLayout {
-        makeCollectionViewLayout()
-    }
-    private lazy var collectionView = makeCollectionView(withLayout: collectionViewLayout)
+    private var collectionViewLayout = CustomLayout()
+    private var collectionView: UICollectionView!
 
     private var dataSource: UICollectionViewDiffableDataSource<Section, Photo>!
     
@@ -67,43 +65,21 @@ final class MainViewController: BaseController {
         searchResultController?.view.backgroundColor = R.Colors.primaryBackgroundColor
     }
     
-    
-    //MARK: Make CV
-    
-    private func makeCollectionViewLayout() -> UICollectionViewCompositionalLayout {
-        // Item
-        let item = NSCollectionLayoutItem(layoutSize: .init(
-            widthDimension: .fractionalWidth(0.5),
-            heightDimension: .fractionalHeight(1)
-        ))
-        item.contentInsets = .init(top: 0, leading: 0, bottom: 0, trailing: 0)
-        
-        // Group
-        let group = NSCollectionLayoutGroup.horizontal(layoutSize: .init(
-            widthDimension: .fractionalWidth(1),
-            heightDimension: .fractionalHeight(2/5)
-        ),  subitems: [item])
-        group.interItemSpacing = .none
-        group.edgeSpacing = .none
-        
-        // Section
-        let section = NSCollectionLayoutSection(group: group)
-        section.contentInsets = .zero
-        
-        return UICollectionViewCompositionalLayout(section: section)
+    private func setupCollectionView(withLayout layout: UICollectionViewLayout) {
+        collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
+        collectionView.layer.cornerRadius = 10
+        collectionView.backgroundColor = .clear
+        collectionView.contentInsetAdjustmentBehavior = .never
+        collectionView.dataSource = dataSource
+        collectionView.showsVerticalScrollIndicator = false
+        collectionView.prefetchDataSource = self
+        collectionView.isPrefetchingEnabled = true
+        collectionView.register(ImageCell.self, forCellWithReuseIdentifier: ImageCell.imageCellIdentifier)
     }
-        
-    private func makeCollectionView(withLayout layout: UICollectionViewCompositionalLayout) -> UICollectionView {
-        let cv = UICollectionView(frame: .zero, collectionViewLayout: layout)
-        cv.layer.cornerRadius = 10
-        cv.backgroundColor = .clear
-        cv.contentInsetAdjustmentBehavior = .never
-        cv.showsVerticalScrollIndicator = false
-        cv.delegate = self
-        cv.prefetchDataSource = self
-        cv.isPrefetchingEnabled = true
-        cv.register(ImageCell.self, forCellWithReuseIdentifier: ImageCell.imageCellIdentifier)
-        return cv
+    
+    private func setupDelegates() {
+        collectionViewLayout.delegate = self
+        collectionView.delegate = self
     }
 }
 
@@ -114,10 +90,11 @@ extension MainViewController {
     
     override func setupView() {
         super.setupView()
-        setupDataSource()
         setupTitleLabel()
         setupSearchController()
-        
+        setupCollectionView(withLayout: collectionViewLayout)
+        setupDataSource()
+        setupDelegates()
         view.addNewSubview(titleLabel)
         view.addNewSubview(collectionView)
     }
@@ -179,20 +156,25 @@ private extension MainViewController {
         snapshot.appendSections([.main])
         snapshot.appendItems(photos)
         
-        dataSource.apply(snapshot, animatingDifferences: true)
+        dataSource.apply(snapshot, animatingDifferences: false)
     }
 }
 
-//MARK: - Delegate
+//MARK: - Delegates
 
 extension MainViewController: UICollectionViewDelegate {
     
-    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+    func collectionView(_ collectionView: UICollectionView, 
+                        didSelectItemAt indexPath: IndexPath) {
+        
         collectionView.layoutIfNeeded()
         print("Selected: \(indexPath.item) / collectionView layout reloaded")
     }
     
-    func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+    func collectionView(_ collectionView: UICollectionView, 
+                        willDisplay cell: UICollectionViewCell,
+                        forItemAt indexPath: IndexPath) {
+        
         if indexPath.item == (viewModel.photos.count - 2) {
             viewModel.paginationArguments.currentPage += 1
             viewModel.getAllPhotos()
@@ -200,11 +182,27 @@ extension MainViewController: UICollectionViewDelegate {
     }
 }
 
+extension MainViewController: CustomLayoutDelegate {
+    
+    func collectionView(_ collectionView: UICollectionView,
+                        heightForImageAtIndexPath indexPath: IndexPath) -> CGFloat {
+
+        let receivedImageSize = CGSize(
+            width: viewModel.photos[indexPath.item].width,
+            height: viewModel.photos[indexPath.item].height
+        )
+        let screenWidth = UIScreen.main.bounds.width / 2
+        return (receivedImageSize.height / receivedImageSize.width) * screenWidth
+    }
+}
+
 //MARK: - Prefetching
 
 extension MainViewController: UICollectionViewDataSourcePrefetching {
     
-    func collectionView(_ collectionView: UICollectionView, prefetchItemsAt indexPaths: [IndexPath]) {
+    func collectionView(_ collectionView: UICollectionView, 
+                        prefetchItemsAt indexPaths: [IndexPath]) {
+        
         indexPaths.forEach {
             if $0.item >= (viewModel.photos.count - 3) {
                 viewModel.paginationArguments.currentPage += 1
@@ -245,8 +243,6 @@ private extension MainViewController {
             .sink { [weak self] photos in
                 DispatchQueue.main.async {
                     self?.updateSnapshot(withPhotos: photos)
-                    self?.collectionView.reloadData()
-                    self?.collectionView.layoutIfNeeded()
                 }
             }
             .store(in: &cancellables)

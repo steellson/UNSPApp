@@ -7,11 +7,12 @@
 
 import Foundation
 import UIKit
+import SnapKit
 
 //MARK: - Impl
 
 final class ImageCell: BaseCell {
-    
+
     static let imageCellIdentifier = R.Strings.imageCellIdentifier.rawValue
     
     private let activityIndicator: UIActivityIndicatorView = {
@@ -22,14 +23,7 @@ final class ImageCell: BaseCell {
         return indicator
     }()
     
-    private let imageView = ResizableImageView(frame: .zero)
-    
-    public lazy var imageHeight: CGFloat = {
-        guard let image = imageView.image else {
-            print("Couldnt get image height in imageCell!"); return .zero
-        }
-        return image.size.height
-    }()
+    private let imageView = UIImageView()
     
     
     func configureCell(withImage image: UIImage) {
@@ -42,25 +36,15 @@ final class ImageCell: BaseCell {
     
     //MARK: Setup
     
-    private func setupFrames() {
-        imageView.frame = contentView.bounds
-        activityIndicator.frame = CGRect(
-            x: contentView.center.x,
-            y: contentView.center.y,
-            width: 20,
-            height: 20
-        )
-    }
-    
     private func setupContentView() {
         contentView.backgroundColor = .systemBackground.withAlphaComponent(0.5)
         contentView.layer.borderColor = UIColor.systemGray.cgColor
         contentView.layer.borderWidth = 0.5
         contentView.clipsToBounds = true
         contentView.layer.masksToBounds = true
-        contentView.frame = imageView.bounds
-        contentView.addSubview(activityIndicator)
-        contentView.addSubview(imageView)
+        contentView.translatesAutoresizingMaskIntoConstraints = false
+        contentView.addNewSubview(activityIndicator)
+        contentView.addNewSubview(imageView)
     }
     
     private func setupActivityIndicator() {
@@ -72,6 +56,12 @@ final class ImageCell: BaseCell {
             activityIndicator.stopAnimating()
         }
     }
+    
+    private func setupImageView() {
+        imageView.clipsToBounds = true
+        imageView.contentMode = .scaleAspectFit
+        imageView.tintColor = .black
+    }
 }
             
 //MARK: - Base
@@ -80,14 +70,26 @@ extension ImageCell {
     
     override func setupCell() {
         super.setupCell()
-        setupFrames()
-        setupActivityIndicator()
         setupContentView()
+        setupImageView()
+        setupActivityIndicator()
     }
     
-    override func clearCell() {
-        super.clearCell()
-        imageView.image = UIImage(named: "bandage")
+    override func setupCellLayout() {
+        super.setupCellLayout()
+        
+        contentView.snp.makeConstraints {
+            $0.edges.equalToSuperview()
+        }
+        
+        activityIndicator.snp.makeConstraints {
+            $0.center.equalToSuperview()
+            $0.width.height.equalTo(30)
+        }
+        
+        imageView.snp.makeConstraints {
+            $0.edges.equalToSuperview()
+        }
     }
 }
 
