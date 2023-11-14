@@ -17,12 +17,16 @@ final class MainViewController: BaseController {
     
     private let titleLabel = UILabel()
     private let searchController = UISearchController()
-    private lazy var collectionView = makeCollectionView()
+    
+    private var collectionViewLayout = CustomLayout()
+    private var collectionView: UICollectionView!
 
     private var dataSource: UICollectionViewDiffableDataSource<Section, Photo>!
     
     private var cancellables = Set<AnyCancellable>()
 
+    
+    //MARK: Init
     
     init(
         viewModel: MainViewModelProtocol
@@ -35,6 +39,9 @@ final class MainViewController: BaseController {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+    
+    
+    //MARK: Setup
     
     private func setupTitleLabel() {
         titleLabel.text = R.Strings.mainScreenTitle.rawValue
@@ -58,26 +65,21 @@ final class MainViewController: BaseController {
         searchResultController?.view.backgroundColor = R.Colors.primaryBackgroundColor
     }
     
-    private func makeFlowLayout() -> UICollectionViewFlowLayout {
-        let flowLayout = UICollectionViewFlowLayout()
-        flowLayout.scrollDirection = .vertical
-        flowLayout.minimumLineSpacing = 0
-        flowLayout.minimumInteritemSpacing = 0
-        flowLayout.estimatedItemSize = UICollectionViewFlowLayout.automaticSize
-        return flowLayout
+    private func setupCollectionView(withLayout layout: UICollectionViewLayout) {
+        collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
+        collectionView.layer.cornerRadius = 10
+        collectionView.backgroundColor = .clear
+        collectionView.contentInsetAdjustmentBehavior = .never
+        collectionView.dataSource = dataSource
+        collectionView.showsVerticalScrollIndicator = false
+        collectionView.prefetchDataSource = self
+        collectionView.isPrefetchingEnabled = true
+        collectionView.register(ImageCell.self, forCellWithReuseIdentifier: ImageCell.imageCellIdentifier)
     }
-        
-    private func makeCollectionView() -> UICollectionView {
-        let cv = UICollectionView(frame: .zero, collectionViewLayout: makeFlowLayout())
-        cv.layer.cornerRadius = 10
-        cv.backgroundColor = .systemBackground.withAlphaComponent(0.5)
-        cv.contentInsetAdjustmentBehavior = .never
-        cv.showsVerticalScrollIndicator = false
-        cv.delegate = self
-        cv.prefetchDataSource = self
-        cv.isPrefetchingEnabled = true
-        cv.register(ImageCell.self, forCellWithReuseIdentifier: ImageCell.imageCellIdentifier)
-        return cv
+    
+    private func setupDelegates() {
+        collectionViewLayout.delegate = self
+        collectionView.delegate = self
     }
 }
 
@@ -88,10 +90,11 @@ extension MainViewController {
     
     override func setupView() {
         super.setupView()
-        setupDataSource()
         setupTitleLabel()
         setupSearchController()
-        
+        setupCollectionView(withLayout: collectionViewLayout)
+        setupDataSource()
+        setupDelegates()
         view.addNewSubview(titleLabel)
         view.addNewSubview(collectionView)
     }
@@ -144,7 +147,6 @@ private extension MainViewController {
                         print("ERROR: Couldnt download image")
                     }
                 }
-        
                 return imageCell
             })
     }
@@ -154,20 +156,25 @@ private extension MainViewController {
         snapshot.appendSections([.main])
         snapshot.appendItems(photos)
         
-        dataSource.apply(snapshot, animatingDifferences: true)
+        dataSource.apply(snapshot, animatingDifferences: false)
     }
 }
 
-//MARK: - Delegate
+//MARK: - Delegates
 
 extension MainViewController: UICollectionViewDelegate {
     
-    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        print("Selected: \(indexPath.item) / collection reloaded")
-        collectionView.reloadData()
+    func collectionView(_ collectionView: UICollectionView, 
+                        didSelectItemAt indexPath: IndexPath) {
+        
+        collectionView.layoutIfNeeded()
+        print("Selected: \(indexPath.item) / collectionView layout reloaded")
     }
     
-    func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+    func collectionView(_ collectionView: UICollectionView, 
+                        willDisplay cell: UICollectionViewCell,
+                        forItemAt indexPath: IndexPath) {
+        
         if indexPath.item == (viewModel.photos.count - 2) {
             viewModel.paginationArguments.currentPage += 1
             viewModel.getAllPhotos()
@@ -175,11 +182,27 @@ extension MainViewController: UICollectionViewDelegate {
     }
 }
 
+extension MainViewController: CustomLayoutDelegate {
+    
+    func collectionView(_ collectionView: UICollectionView,
+                        heightForImageAtIndexPath indexPath: IndexPath) -> CGFloat {
+
+        let receivedImageSize = CGSize(
+            width: viewModel.photos[indexPath.item].width,
+            height: viewModel.photos[indexPath.item].height
+        )
+        let screenWidth = UIScreen.main.bounds.width / 2
+        return (receivedImageSize.height / receivedImageSize.width) * screenWidth
+    }
+}
+
 //MARK: - Prefetching
 
 extension MainViewController: UICollectionViewDataSourcePrefetching {
     
-    func collectionView(_ collectionView: UICollectionView, prefetchItemsAt indexPaths: [IndexPath]) {
+    func collectionView(_ collectionView: UICollectionView, 
+                        prefetchItemsAt indexPaths: [IndexPath]) {
+        
         indexPaths.forEach {
             if $0.item >= (viewModel.photos.count - 3) {
                 viewModel.paginationArguments.currentPage += 1
@@ -202,7 +225,6 @@ extension MainViewController: UISearchResultsUpdating {
 
         DispatchQueue.main.async { [weak self] in
             self?.viewModel.searchPhotos(withText: searchText.trimmingCharacters(in: .whitespacesAndNewlines))
-            self?.collectionView.reloadData()
         }
     }
 }
@@ -221,7 +243,6 @@ private extension MainViewController {
             .sink { [weak self] photos in
                 DispatchQueue.main.async {
                     self?.updateSnapshot(withPhotos: photos)
-                    self?.collectionView.reloadData()
                 }
             }
             .store(in: &cancellables)
