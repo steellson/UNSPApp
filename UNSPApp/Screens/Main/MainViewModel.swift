@@ -36,6 +36,9 @@ final class MainViewModel {
     
     var queryParameters = Query()
     
+    
+    //MARK: Private
+    
     private(set) var state: MainViewModelState = .none {
         didSet {
             if state != oldValue {
@@ -53,6 +56,9 @@ final class MainViewModel {
     
     private let apiService: APIServiceProtocol
     
+    
+    //MARK: Init
+    
     init(
         apiService: APIServiceProtocol
     ) {
@@ -62,11 +68,14 @@ final class MainViewModel {
         
 //        #warning("Data fetching is turned off")
         getAllPhotos()
-    
+//        getRandomPhotos()
     }
     
+    
+    //MARK: Setup
+    
     private func setupQueryParameters() {
-        queryParameters.perPage = 14
+        queryParameters.perPage = 4
         queryParameters.currentPage = 1
         queryParameters.count = 3
     }
@@ -77,6 +86,7 @@ final class MainViewModel {
 
 extension MainViewModel: MainViewModelProtocol {
     
+    //MARK: Get all photos
     func getAllPhotos() {
         
         if state != .loading {
@@ -100,6 +110,7 @@ extension MainViewModel: MainViewModelProtocol {
         }
     }
     
+    //MARK: Get random photos
     func getRandomPhotos() {
             
             if state != .loading {
@@ -123,6 +134,7 @@ extension MainViewModel: MainViewModelProtocol {
             }
         }
     
+    //MARK: Get concrete photo
     func getConcretePhoto(fromURL url: String?, completion: @escaping (Result<Data, Error>) -> Void) {
         guard let url = url else {
             print("ERROR: Couldnt get url"); return
@@ -148,6 +160,7 @@ extension MainViewModel: MainViewModelProtocol {
         }
     }
     
+    //MARK: Search photos
     func searchPhotos(withText text: String, itemsPerPage: Int) {
         guard !text.isEmpty, text.count > 1 else { return }
         
