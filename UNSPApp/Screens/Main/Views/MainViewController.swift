@@ -176,7 +176,7 @@ extension MainViewController: UICollectionViewDelegate {
                         forItemAt indexPath: IndexPath) {
         
         if indexPath.item == (viewModel.photos.count - 2) {
-            viewModel.paginationArguments.currentPage += 1
+            viewModel.queryParameters.currentPage += 1
             viewModel.getAllPhotos()
         }
     }
@@ -205,7 +205,7 @@ extension MainViewController: UICollectionViewDataSourcePrefetching {
         
         indexPaths.forEach {
             if $0.item >= (viewModel.photos.count - 3) {
-                viewModel.paginationArguments.currentPage += 1
+                viewModel.queryParameters.currentPage += 1
                 viewModel.getAllPhotos()
             }
         }
@@ -224,7 +224,10 @@ extension MainViewController: UISearchResultsUpdating {
         else { return }
 
         DispatchQueue.main.async { [weak self] in
-            self?.viewModel.searchPhotos(withText: searchText.trimmingCharacters(in: .whitespacesAndNewlines))
+            self?.viewModel.searchPhotos(
+                withText: searchText.trimmingCharacters(in: .whitespacesAndNewlines),
+                itemsPerPage: 20
+            )
         }
     }
 }
@@ -239,6 +242,7 @@ private extension MainViewController {
         viewModel.photos
             .publisher
             .collect()
+            .drop(while: { $0.count < 1 })
             .receive(on: DispatchQueue.main)
             .sink { [weak self] photos in
                 DispatchQueue.main.async {

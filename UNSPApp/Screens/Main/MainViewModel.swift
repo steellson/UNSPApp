@@ -21,11 +21,12 @@ enum MainViewModelState {
 protocol MainViewModelProtocol: AnyObject {
     var state: MainViewModelState { get }
     var photos: [Photo] { get }
-    var paginationArguments: Query { get set }
+    
+    var queryParameters: Query { get set }
 
     func getAllPhotos()
     func getConcretePhoto(fromURL url: String?, completion: @escaping (Result<Data, Error>) -> Void)
-    func searchPhotos(withText text: String)
+    func searchPhotos(withText text: String, itemsPerPage: Int)
 }
 
 
@@ -33,7 +34,7 @@ protocol MainViewModelProtocol: AnyObject {
 
 final class MainViewModel {
     
-    var paginationArguments = Query(perPage: 10, currentPage: 1)
+    var queryParameters = Query()
     
     private(set) var state: MainViewModelState = .none {
         didSet {
@@ -57,11 +58,20 @@ final class MainViewModel {
     ) {
         self.apiService = apiService
         
-//        #warning("Data fetching is turned off")
-//        getAllPhotos()
+        setupQueryParameters()
         
+//        #warning("Data fetching is turned off")
+        getAllPhotos()
+    
+    }
+    
+    private func setupQueryParameters() {
+        queryParameters.perPage = 14
+        queryParameters.currentPage = 1
+        queryParameters.count = 3
     }
 }
+
 
 //MARK: - Protocol extension
 
@@ -72,9 +82,12 @@ extension MainViewModel: MainViewModelProtocol {
         if state != .loading {
             state = .loading
         }
-        print("Loading photos from page: \(paginationArguments.currentPage)")
+        print("Loading photos from page: \(queryParameters.currentPage)")
 
-        apiService.fetchPhotos(withParameters: paginationArguments) { [weak self] result in
+        apiService.fetchPhotos(
+            withParameters: queryParameters
+        ) { [weak self] result in
+            
                 switch result {
                 case .success(let photos):
                     self?.photos += photos.sorted(by: { $0.height < $1.height })
@@ -87,6 +100,29 @@ extension MainViewModel: MainViewModelProtocol {
         }
     }
     
+    func getRandomPhotos() {
+            
+            if state != .loading {
+                state = .loading
+            }
+        print("Loading \(queryParameters.count) photos...")
+
+        apiService.fetchRandomPhotos(
+            withParameters: queryParameters
+        ) { [weak self] result in
+            
+                    switch result {
+                    case .success(let photos):
+                        self?.photos += photos.sorted(by: { $0.height < $1.height })
+                        self?.state = .normal
+                    case .failure(let error):
+                        print(error.localizedDescription)
+                        self?.photos = []
+                        self?.state = .error
+                    }
+            }
+        }
+    
     func getConcretePhoto(fromURL url: String?, completion: @escaping (Result<Data, Error>) -> Void) {
         guard let url = url else {
             print("ERROR: Couldnt get url"); return
@@ -96,7 +132,10 @@ extension MainViewModel: MainViewModelProtocol {
             state = .loading
         }
 
-        apiService.downloadPhoto(fromURL: url) { [weak self] result in
+        apiService.downloadPhoto(
+            fromURL: url)
+        { [weak self] result in
+            
                 switch result {
                 case .success(let data):
                     completion(.success(data))
@@ -109,7 +148,7 @@ extension MainViewModel: MainViewModelProtocol {
         }
     }
     
-    func searchPhotos(withText text: String) {
+    func searchPhotos(withText text: String, itemsPerPage: Int) {
         guard !text.isEmpty, text.count > 1 else { return }
         
         if state != .loading {
@@ -118,7 +157,7 @@ extension MainViewModel: MainViewModelProtocol {
         
         apiService.searchPhoto(
             withText: text,
-            itemsPerPage: 20
+            itemsPerPage: itemsPerPage
         ) { [weak self] result in
             
             switch result {
