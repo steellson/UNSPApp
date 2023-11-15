@@ -21,7 +21,7 @@ enum MainViewModelState {
 protocol MainViewModelProtocol: AnyObject {
     var state: MainViewModelState { get }
     var photos: [Photo] { get }
-    var paginationArguments: QueryArguments { get set }
+    var paginationArguments: Query { get set }
 
     func getAllPhotos()
     func getConcretePhoto(fromURL url: String?, completion: @escaping (Result<Data, Error>) -> Void)
@@ -33,7 +33,7 @@ protocol MainViewModelProtocol: AnyObject {
 
 final class MainViewModel {
     
-    var paginationArguments = QueryArguments(perPage: 10, currentPage: 1)
+    var paginationArguments = Query(perPage: 10, currentPage: 1)
     
     private(set) var state: MainViewModelState = .none {
         didSet {

@@ -28,6 +28,7 @@
 		3D82553C2AE909E400D84FC7 /* BaseCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D82553B2AE909E400D84FC7 /* BaseCell.swift */; };
 		3D82553E2AE94F7000D84FC7 /* Sections.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D82553D2AE94F7000D84FC7 /* Sections.swift */; };
 		3D8255442AEE604400D84FC7 /* URLBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D8255432AEE604400D84FC7 /* URLBuilder.swift */; };
+		3DEAFF602B04F84B004CAE97 /* Query.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DEAFF5F2B04F84B004CAE97 /* Query.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -53,6 +54,7 @@
 		3D82553B2AE909E400D84FC7 /* BaseCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseCell.swift; sourceTree = "<group>"; };
 		3D82553D2AE94F7000D84FC7 /* Sections.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sections.swift; sourceTree = "<group>"; };
 		3D8255432AEE604400D84FC7 /* URLBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLBuilder.swift; sourceTree = "<group>"; };
+		3DEAFF5F2B04F84B004CAE97 /* Query.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Query.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -149,6 +151,7 @@
 			isa = PBXGroup;
 			children = (
 				3D8255262AE6B32000D84FC7 /* APIService.swift */,
+				3DEAFF5F2B04F84B004CAE97 /* Query.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -283,6 +286,7 @@
 				3D82553C2AE909E400D84FC7 /* BaseCell.swift in Sources */,
 				3D8255442AEE604400D84FC7 /* URLBuilder.swift in Sources */,
 				3D8255322AE7B3AA00D84FC7 /* Client.swift in Sources */,
+				3DEAFF602B04F84B004CAE97 /* Query.swift in Sources */,
 				3D4805D92B0346F000EC98A6 /* CustomLayout.swift in Sources */,
 				3D8255302AE7A75000D84FC7 /* Photo.swift in Sources */,
 				3D8255382AE7EA6E00D84FC7 /* UIView+Extension.swift in Sources */,

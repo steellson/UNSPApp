@@ -11,7 +11,7 @@ import Foundation
 
 protocol APIServiceProtocol: AnyObject {
     func fetchPhotos(withParameters
-                     parameters: QueryArguments,
+                     parameters: Query,
                      completion: @escaping (Result<[Photo], RequestError>) -> Void)
     
     func downloadPhoto(fromURL
@@ -53,7 +53,7 @@ extension APIService: APIServiceProtocol {
     
     //MARK:  Get all photos
     func fetchPhotos(withParameters
-                     parameters: QueryArguments,
+                     parameters: Query,
                      completion: @escaping (Result<[Photo], RequestError>) -> Void) {
                 
         guard let url = URLBuilder.buildURL(
@@ -62,11 +62,11 @@ extension APIService: APIServiceProtocol {
             path: .getPhotos,
             queryItems: [
                 .init(
-                    name: QueryArguments.ArgumentNames.page.rawValue,
+                    name: Query.ArgumentName.page.rawValue,
                     value: "\(parameters.currentPage)"
                 ),
                 .init(
-                    name: QueryArguments.ArgumentNames.per_page.rawValue,
+                    name: Query.ArgumentName.per_page.rawValue,
                     value: "\(parameters.perPage)"
                 )
             ]
@@ -160,11 +160,11 @@ extension APIService: APIServiceProtocol {
             path: .getPhotos,
             queryItems: [
                 .init(
-                    name: QueryArguments.ArgumentNames.per_page.rawValue,
+                    name: Query.ArgumentName.per_page.rawValue,
                     value: String(itemsPerPageValue)
                      ),
                 .init(
-                    name: QueryArguments.ArgumentNames.query.rawValue,
+                    name: Query.ArgumentName.query.rawValue,
                     value: text
                 )
             ]

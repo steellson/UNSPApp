@@ -7,6 +7,8 @@
 
 import Foundation
 
+//MARK: - Construct
+
 enum URLScheme: String {
     case http
     case https
@@ -18,21 +20,10 @@ enum URLHost: String {
 
 enum APIPath: String {
     case getPhotos = "/photos"
+    case getRandomPhotos = "/photos/random"
 }
 
-struct QueryArguments {
-    
-    enum ArgumentNames: String {
-        case per_page
-        case page
-        case query
-    }
-    
-    var perPage: Int
-    var currentPage: Int
-    
-    var queryText: String?
-}
+//MARK: - Builder
 
 struct URLBuilder {
     
@@ -40,8 +31,7 @@ struct URLBuilder {
                          scheme: URLScheme,
                          host: URLHost,
                          path: APIPath,
-                         queryItems: [URLQueryItem]
-    ) -> URL? {
+                         queryItems: [URLQueryItem]) -> URL? {
         
         var urlComponents = URLComponents()
         urlComponents.scheme = scheme.rawValue
