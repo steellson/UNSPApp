@@ -58,7 +58,8 @@ final class MainViewModel {
         self.apiService = apiService
         
 //        #warning("Data fetching is turned off")
-        getAllPhotos()
+//        getAllPhotos()
+        
     }
 }
 
@@ -115,7 +116,11 @@ extension MainViewModel: MainViewModelProtocol {
             state = .loading
         }
         
-        apiService.searchPhoto(withText: text) { [weak self] result in
+        apiService.searchPhoto(
+            withText: text,
+            itemsPerPage: 20
+        ) { [weak self] result in
+            
             switch result {
             case .success(let photos):
                 self?.photos = photos
