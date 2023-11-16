@@ -47,9 +47,8 @@ final class CustomLayout: UICollectionViewLayout {
     }
     
     override func prepare() {
-        guard cache.isEmpty,
-              let collectionView = collectionView
-        else { return }
+        cache = []
+        guard let collectionView = collectionView else { return }
         
         let columnWidth = contentWidth / CGFloat(numberOfColumns)
         var xOffset: [CGFloat] = []
@@ -69,6 +68,7 @@ final class CustomLayout: UICollectionViewLayout {
                 heightForImageAtIndexPath: indexPath) ?? .zero
             
             let height = cellPadding * 2 + photoHeight
+            
             let frame = CGRect(x: xOffset[column],
                                y: yOffset[column],
                                width: columnWidth,
@@ -77,6 +77,7 @@ final class CustomLayout: UICollectionViewLayout {
             
             let attributes = UICollectionViewLayoutAttributes(forCellWith: indexPath)
             attributes.frame = insetFrame
+            
             cache.append(attributes)
             
             contentHeight = max(contentHeight, frame.maxY)
@@ -97,7 +98,7 @@ final class CustomLayout: UICollectionViewLayout {
         return visibleLayoutAttributes
     }
     
-//    override func layoutAttributesForItem(at indexPath: IndexPath) -> UICollectionViewLayoutAttributes? {
-//        return cache[indexPath.item]
-//    }
+    override func layoutAttributesForItem(at indexPath: IndexPath) -> UICollectionViewLayoutAttributes? {
+        return cache[indexPath.item]
+    }
 }
