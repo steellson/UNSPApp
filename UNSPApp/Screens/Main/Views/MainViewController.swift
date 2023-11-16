@@ -13,7 +13,7 @@ import Combine
 
 final class MainViewController: BaseController {
     
-    private var viewModel: MainViewModelProtocol
+    private var viewModel: MainViewModel
     
     private let titleLabel = UILabel()
     private let searchController = UISearchController()
@@ -29,7 +29,7 @@ final class MainViewController: BaseController {
     //MARK: Init
     
     init(
-        viewModel: MainViewModelProtocol
+        viewModel: MainViewModel
     ) {
         self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
@@ -126,7 +126,7 @@ private extension MainViewController {
     func setupDataSource() {
         dataSource = UICollectionViewDiffableDataSource(
             collectionView: collectionView,
-            cellProvider: { [weak self] (collectionView, indexPath, photo) -> UICollectionViewCell? in
+            cellProvider: { (collectionView, indexPath, photo) -> UICollectionViewCell? in
                 
                 guard let imageCell = collectionView.dequeueReusableCell(
                     withReuseIdentifier: ImageCell.imageCellIdentifier,
@@ -134,14 +134,14 @@ private extension MainViewController {
                 ) as? ImageCell else {
                     print("ERROR: Couldnt dequeue cell with reuse identifier"); return UICollectionViewCell()
                 }
-                
-                //MARK: Download image (THUMB)
-                self?.viewModel.getConcretePhoto(fromURL: photo.urls.thumb) { result in
+        
+                self.viewModel.getConcretePhoto(fromURL: photo.urls.thumb) { result in
                     switch result {
                     case .success(let imageData):
                         guard let recievedImage = UIImage(data: imageData) else {
                             print("ERROR: Couldt get recieved image"); return
                         }
+                            
                         imageCell.configureCell(withImage: recievedImage)
                     case .failure:
                         print("ERROR: Couldnt download image")
@@ -155,8 +155,8 @@ private extension MainViewController {
         var snapshot = NSDiffableDataSourceSnapshot<Section, Photo>()
         snapshot.appendSections([.main])
         snapshot.appendItems(photos)
-        
-        dataSource.apply(snapshot, animatingDifferences: false)
+
+        dataSource.apply(snapshot, animatingDifferences: true)
     }
 }
 
@@ -203,12 +203,12 @@ extension MainViewController: UICollectionViewDataSourcePrefetching {
     func collectionView(_ collectionView: UICollectionView, 
                         prefetchItemsAt indexPaths: [IndexPath]) {
         
-        indexPaths.forEach {
-            if $0.item >= (viewModel.photos.count - 3) {
-                viewModel.queryParameters.currentPage += 1
-                viewModel.getAllPhotos()
-            }
-        }
+//        indexPaths.forEach {
+//            if $0.item >= (viewModel.photos.count - 3) {
+//                viewModel.queryParameters.currentPage += 1
+//                viewModel.getAllPhotos()
+//            }
+//        }
     }
 }
 
@@ -217,18 +217,18 @@ extension MainViewController: UICollectionViewDataSourcePrefetching {
 extension MainViewController: UISearchResultsUpdating {
     
     func updateSearchResults(for searchController: UISearchController) {
-        guard
-            let searchText = searchController.searchBar.text,
-            !searchText.isEmpty,
-            searchText.count > 1 
-        else { return }
-
-        DispatchQueue.main.async { [weak self] in
-            self?.viewModel.searchPhotos(
-                withText: searchText.trimmingCharacters(in: .whitespacesAndNewlines),
-                itemsPerPage: 20
-            )
-        }
+//        guard
+//            let searchText = searchController.searchBar.text,
+//            !searchText.isEmpty,
+//            searchText.count > 1 
+//        else { return }
+//
+//        DispatchQueue.main.async { [weak self] in
+//            self?.viewModel.searchPhotos(
+//                withText: searchText.trimmingCharacters(in: .whitespacesAndNewlines),
+//                itemsPerPage: 20
+//            )
+//        }
     }
 }
 
@@ -239,9 +239,7 @@ private extension MainViewController {
     
     func bindPhotoCollection() {
         
-        viewModel.photos
-            .publisher
-            .collect()
+        viewModel.$photos
             .drop(while: { $0.count < 1 })
             .receive(on: DispatchQueue.main)
             .sink { [weak self] photos in

@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Combine
 
 //MARK: - State
 
@@ -16,28 +17,11 @@ enum MainViewModelState {
     case error
 }
 
-//MARK: - Protocol
-
-protocol MainViewModelProtocol: AnyObject {
-    var state: MainViewModelState { get }
-    var photos: [Photo] { get }
-    
-    var queryParameters: Query { get set }
-
-    func getAllPhotos()
-    func getConcretePhoto(fromURL url: String?, completion: @escaping (Result<Data, Error>) -> Void)
-    func searchPhotos(withText text: String, itemsPerPage: Int)
-}
-
-
 //MARK: - Impl
 
 final class MainViewModel {
     
     var queryParameters = Query()
-    
-    
-    //MARK: Private
     
     private(set) var state: MainViewModelState = .none {
         didSet {
@@ -47,7 +31,7 @@ final class MainViewModel {
         }
     }
     
-    private(set) var photos = [Photo]() {
+    @Published private(set) var photos = [Photo]() {
         didSet {
             guard !photos.isEmpty else { return }
             print(R.Strings.photoDataSourceUpdated.rawValue)
@@ -57,8 +41,6 @@ final class MainViewModel {
     private let apiService: APIServiceProtocol
     
     
-    //MARK: Init
-    
     init(
         apiService: APIServiceProtocol
     ) {
@@ -66,25 +48,20 @@ final class MainViewModel {
         
         setupQueryParameters()
         
-//        #warning("Data fetching is turned off")
         getAllPhotos()
-//        getRandomPhotos()
     }
     
-    
-    //MARK: Setup
-    
+        
     private func setupQueryParameters() {
-        queryParameters.perPage = 4
-        queryParameters.currentPage = 1
-        queryParameters.count = 3
+        queryParameters.perPage = 3
+        queryParameters.currentPage = 4
     }
 }
 
 
-//MARK: - Protocol extension
+//MARK: - Public Methods
 
-extension MainViewModel: MainViewModelProtocol {
+extension MainViewModel {
     
     //MARK: Get all photos
     func getAllPhotos() {
@@ -109,30 +86,7 @@ extension MainViewModel: MainViewModelProtocol {
                 }
         }
     }
-    
-    //MARK: Get random photos
-    func getRandomPhotos() {
-            
-            if state != .loading {
-                state = .loading
-            }
-        print("Loading \(queryParameters.count) photos...")
 
-        apiService.fetchRandomPhotos(
-            withParameters: queryParameters
-        ) { [weak self] result in
-            
-                    switch result {
-                    case .success(let photos):
-                        self?.photos += photos.sorted(by: { $0.height < $1.height })
-                        self?.state = .normal
-                    case .failure(let error):
-                        print(error.localizedDescription)
-                        self?.photos = []
-                        self?.state = .error
-                    }
-            }
-        }
     
     //MARK: Get concrete photo
     func getConcretePhoto(fromURL url: String?, completion: @escaping (Result<Data, Error>) -> Void) {
