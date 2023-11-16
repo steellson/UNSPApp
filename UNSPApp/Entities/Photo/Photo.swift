@@ -17,11 +17,11 @@ struct Photo {
 
 extension Photo: Hashable {
     func hash(into hasher: inout Hasher) {
-        hasher.combine(id)
+        hasher.combine(urls.thumb)
     }
     
     static func == (lhs: Photo, rhs: Photo) -> Bool {
-        lhs.id == rhs.id
+        lhs.urls.thumb == rhs.urls.thumb
     }
 }
 
