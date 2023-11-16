@@ -175,7 +175,11 @@ extension MainViewController: UICollectionViewDelegate {
                         willDisplay cell: UICollectionViewCell,
                         forItemAt indexPath: IndexPath) {
         
-        if indexPath.item == (viewModel.photos.count - 2) {
+        let currentPage = viewModel.queryParameters.currentPage
+        let limitPage = viewModel.queryParameters.pagesAmountValue
+        let triggerValue = viewModel.photos.count - 2
+
+        if indexPath.item == triggerValue && currentPage <= limitPage {
             viewModel.queryParameters.currentPage += 1
             viewModel.getAllPhotos()
         }

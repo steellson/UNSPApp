@@ -11,6 +11,8 @@ import Foundation
 
 final class Query {
     
+    let pagesAmountValue = 20
+    
     //MARK: Select
     enum ArgumentName: String {
         case per_page
