@@ -179,6 +179,7 @@ extension MainViewController: UICollectionViewDelegate {
 //            viewModel.queryParameters.currentPage += 1
 //            viewModel.getAllPhotos()
 //        }
+
     }
 }
 
@@ -203,12 +204,12 @@ extension MainViewController: UICollectionViewDataSourcePrefetching {
     func collectionView(_ collectionView: UICollectionView, 
                         prefetchItemsAt indexPaths: [IndexPath]) {
         
-//        indexPaths.forEach {
-//            if $0.item >= (viewModel.photos.count - 3) {
-//                viewModel.queryParameters.currentPage += 1
-//                viewModel.getAllPhotos()
-//            }
-//        }
+        indexPaths.forEach {
+            if $0.item >= (viewModel.photos.count - 3) {
+                viewModel.queryParameters.currentPage += 1
+                viewModel.getAllPhotos()
+            }
+        }
     }
 }
 
@@ -217,18 +218,20 @@ extension MainViewController: UICollectionViewDataSourcePrefetching {
 extension MainViewController: UISearchResultsUpdating {
     
     func updateSearchResults(for searchController: UISearchController) {
-//        guard
-//            let searchText = searchController.searchBar.text,
-//            !searchText.isEmpty,
-//            searchText.count > 1 
-//        else { return }
-//
-//        DispatchQueue.main.async { [weak self] in
-//            self?.viewModel.searchPhotos(
-//                withText: searchText.trimmingCharacters(in: .whitespacesAndNewlines),
-//                itemsPerPage: 20
-//            )
-//        }
+        guard
+            let searchText = searchController.searchBar.text,
+            !searchText.isEmpty,
+            searchText.count > 1 
+        else {
+            return
+        }
+
+        DispatchQueue.main.async { [weak self] in
+            self?.viewModel.searchPhotos(
+                withText: searchText.trimmingCharacters(in: .whitespacesAndNewlines),
+                itemsPerPage: 20
+            )
+        }
     }
 }
 
