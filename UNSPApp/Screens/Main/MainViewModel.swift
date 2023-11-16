@@ -53,8 +53,8 @@ final class MainViewModel {
     
         
     private func setupQueryParameters() {
-        queryParameters.perPage = 3
-        queryParameters.currentPage = 4
+        queryParameters.perPage = 11
+        queryParameters.currentPage = 1
     }
 }
 

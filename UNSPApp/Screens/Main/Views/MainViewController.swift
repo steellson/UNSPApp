@@ -175,10 +175,10 @@ extension MainViewController: UICollectionViewDelegate {
                         willDisplay cell: UICollectionViewCell,
                         forItemAt indexPath: IndexPath) {
         
-        if indexPath.item == (viewModel.photos.count - 2) {
-            viewModel.queryParameters.currentPage += 1
-            viewModel.getAllPhotos()
-        }
+//        if indexPath.item == (viewModel.photos.count - 2) {
+//            viewModel.queryParameters.currentPage += 1
+//            viewModel.getAllPhotos()
+//        }
     }
 }
 
