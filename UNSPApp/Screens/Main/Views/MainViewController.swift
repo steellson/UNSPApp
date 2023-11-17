@@ -14,17 +14,17 @@ import Combine
 
 class MainViewController: BaseController {
     
-    var viewDidLoadSubject = PassthroughSubject<Void, Never>()
-    var queryTextSubject = PassthroughSubject<String?, Never>()
-    
     private let titleLabel = UILabel()
     
     private let searchController = UISearchController()
     
     private var collectionViewLayout = CustomLayout()
-    var collectionView: UICollectionView!
+    private var collectionView: UICollectionView!
     
     private var dataSource: UICollectionViewDiffableDataSource<Section, Photo>!
+    
+    private var viewDidLoadSubject = PassthroughSubject<Void, Never>()
+    private var queryTextSubject = PassthroughSubject<String?, Never>()
 
     private var cancellables = Set<AnyCancellable>()
     
