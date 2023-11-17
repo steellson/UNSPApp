@@ -12,23 +12,23 @@ import Combine
 
 //MARK: - Impl
 
-final class MainViewController: BaseController {
+class MainViewController: BaseController {
     
-    private var viewModel: MainViewModel
+    var viewDidLoadSubject = PassthroughSubject<Void, Never>()
+    var queryTextSubject = PassthroughSubject<String?, Never>()
     
     private let titleLabel = UILabel()
+    
     private let searchController = UISearchController()
     
     private var collectionViewLayout = CustomLayout()
-    private var collectionView: UICollectionView!
+    var collectionView: UICollectionView!
     
     private var dataSource: UICollectionViewDiffableDataSource<Section, Photo>!
-    
-    private var viewDidLoadSubject = PassthroughSubject<Void, Never>()
-    private var queryTextSubject = PassthroughSubject<String?, Never>()
 
     private var cancellables = Set<AnyCancellable>()
     
+    private var viewModel: MainViewModel
     
     //MARK: Init
     
@@ -62,11 +62,16 @@ final class MainViewController: BaseController {
         searchController.searchBar.autocapitalizationType = .none
         searchController.searchBar.autocorrectionType = .no
         searchController.searchBar.searchBarStyle = .minimal
+        searchController.obscuresBackgroundDuringPresentation = false
         searchController.searchResultsUpdater = self
-        searchController.obscuresBackgroundDuringPresentation = true
+    }
+    
+    private func setupSearchCancelButtonVisability() {
+        guard let queryText = viewModel.queryText else { return }
+        let searchIsActive = searchController.isActive
+        let isActive = queryText.isEmpty && searchIsActive
         
-        let searchResultController = searchController.searchResultsController
-        searchResultController?.view.backgroundColor = R.Colors.primaryBackgroundColor
+        searchController.searchBar.showsCancelButton = isActive
     }
     
     private func setupCollectionView(withLayout layout: UICollectionViewLayout) {
@@ -131,9 +136,16 @@ private extension MainViewController {
         )
         let output = viewModel.transform(input: input)
         
-        [output.viewDidLoadedPublisher, output.searchQueryTextPublisher].forEach {
-            $0.sink(receiveValue: { _ in  }).store(in: &cancellables)
-        }
+        output.viewDidLoadedPublisher
+            .sink(receiveValue: { _ in  })
+            .store(in: &cancellables)
+        
+        output.searchQueryTextPublisher
+            .sink { [weak self] _ in
+                self?.setupSearchCancelButtonVisability()
+            }
+            .store(in: &cancellables)
+        
         
         output.setDataSourcePublisher
             .drop(while: { $0.count < 1 })
@@ -205,22 +217,18 @@ extension MainViewController: UICollectionViewDataSourcePrefetching {
     }
 }
 
-//MARK: - Search
+
+//MARK: - Search Results Updating
 
 extension MainViewController: UISearchResultsUpdating {
-    
+
     func updateSearchResults(for searchController: UISearchController) {
-        if let searchText = searchController.searchBar.text,
-           !searchText.isEmpty,
-           searchText.count > 1 {
-            
-            queryTextSubject.send(searchText)
-        } else {
-            return
+        
+        if let queryText = searchController.searchBar.text {
+            queryTextSubject.send(queryText.trimmingCharacters(in: .whitespacesAndNewlines))
         }
     }
 }
-
 
 //MARK: - Custom Layout Delegate
 

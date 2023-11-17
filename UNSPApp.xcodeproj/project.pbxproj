@@ -161,7 +161,7 @@
 			children = (
 				3D8255022AE6A03E00D84FC7 /* MainViewController.swift */,
 				3D8255392AE909B100D84FC7 /* ImageCell.swift */,
-				3D4805D82B0346F000EC98A6 /* CustomLayout.swift */,
+				3DEAFF6A2B078A06004CAE97 /* Custom */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -200,6 +200,14 @@
 				3D8255432AEE604400D84FC7 /* URLBuilder.swift */,
 			);
 			path = Helpers;
+			sourceTree = "<group>";
+		};
+		3DEAFF6A2B078A06004CAE97 /* Custom */ = {
+			isa = PBXGroup;
+			children = (
+				3D4805D82B0346F000EC98A6 /* CustomLayout.swift */,
+			);
+			path = Custom;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */

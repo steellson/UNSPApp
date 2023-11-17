@@ -33,6 +33,11 @@ final class MainViewModel {
         let setDataSourcePublisher: AnyPublisher<[Photo], Never>
     }
     
+    enum OutputVoid {
+        case didLoadedPublisher
+        case queryTextPublisher
+    }
+    
     
     //MARK: Variables
     
@@ -46,9 +51,7 @@ final class MainViewModel {
             print(R.Strings.photoDataSourceUpdated.rawValue)
         }
     }
-    
-    @Published private(set) var filteredPhotos = [Photo]()
-    
+        
     private(set) var state: MainViewModelState = .none {
         didSet {
             if state != oldValue {
@@ -70,9 +73,39 @@ final class MainViewModel {
         setupQueryParameters()
         getAllPhotos()
     }
+}
+
+
+//MARK: - Private methods
+
+private extension MainViewModel {
     
+    func eraseToAnyPublusher(_ input: Input,
+                             withType type: OutputVoid) -> AnyPublisher<Void, Never> {
+        switch type {
+        case .didLoadedPublisher: return input
+                .viewDidLoadedPublisher
+                .handleEvents(
+                    receiveOutput:  { [weak self] _ in
+                        self?.getAllPhotos()
+                    }
+                )
+                .flatMap { Just(()) }
+                .eraseToAnyPublisher()
+        case .queryTextPublisher: return input
+                .searchQueryTextPublisher
+                .handleEvents(
+                    receiveOutput:  { [weak self] queryText in
+                        self?.queryText = queryText
+                    }
+                )
+                .flatMap { _ in Just(()) }
+                .eraseToAnyPublisher()
+                        
+        }
+    }
     
-    private func setupQueryParameters() {
+    func setupQueryParameters() {
         queryParameters.perPage = 12
         queryParameters.perPageSearch = 5
         queryParameters.currentPage = 1
@@ -80,31 +113,15 @@ final class MainViewModel {
     }
 }
 
+
+//MARK: - Public methods
+
 extension MainViewModel {
     
-    //MARK: Transform
     func transform(input: Input) -> Output {
         
-        let viewDidLoadedPublisher = input
-            .viewDidLoadedPublisher
-            .handleEvents(
-                receiveOutput:  { [weak self] _ in
-                    self?.getAllPhotos()
-                }
-            )
-            .flatMap { Just(()) }
-            .eraseToAnyPublisher()
-        
-        let searchQueryTextPublisher = input
-            .searchQueryTextPublisher
-            .handleEvents(
-                receiveOutput:  { [weak self] queryText in
-                    self?.queryText = queryText
-                }
-            )
-            .flatMap { _ in Just(()) }
-            .eraseToAnyPublisher()
-        
+        let viewDidLoadedPublisher = eraseToAnyPublusher(input, withType: .didLoadedPublisher)
+        let searchQueryTextPublisher = eraseToAnyPublusher(input, withType: .queryTextPublisher)
         let setDataSourcePublisher = Publishers.CombineLatest(
             $photos.compactMap { $0 },
             $queryText
