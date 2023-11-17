@@ -9,6 +9,8 @@ import Foundation
 
 struct Photo {
     let id: String
+    let description: String?
+    let slug: String
     let width: Int
     let height: Int
     let urls: Urls

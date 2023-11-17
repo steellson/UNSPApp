@@ -9,6 +9,7 @@ import UIKit
 import SnapKit
 import Combine
 
+
 //MARK: - Impl
 
 final class MainViewController: BaseController {
@@ -20,11 +21,14 @@ final class MainViewController: BaseController {
     
     private var collectionViewLayout = CustomLayout()
     private var collectionView: UICollectionView!
-
+    
     private var dataSource: UICollectionViewDiffableDataSource<Section, Photo>!
     
-    private var cancellables = Set<AnyCancellable>()
+    private var viewDidLoadSubject = PassthroughSubject<Void, Never>()
+    private var queryTextSubject = PassthroughSubject<String?, Never>()
 
+    private var cancellables = Set<AnyCancellable>()
+    
     
     //MARK: Init
     
@@ -59,7 +63,8 @@ final class MainViewController: BaseController {
         searchController.searchBar.autocorrectionType = .no
         searchController.searchBar.searchBarStyle = .minimal
         searchController.searchResultsUpdater = self
-        searchController.obscuresBackgroundDuringPresentation = false
+//        searchController.searchBar.delegate = self
+        searchController.obscuresBackgroundDuringPresentation = true
         
         let searchResultController = searchController.searchResultsController
         searchResultController?.view.backgroundColor = R.Colors.primaryBackgroundColor
@@ -95,6 +100,7 @@ extension MainViewController {
         setupCollectionView(withLayout: collectionViewLayout)
         setupDataSource()
         setupDelegates()
+        viewDidLoadSubject.send()
         view.addNewSubview(titleLabel)
         view.addNewSubview(collectionView)
     }
@@ -115,7 +121,7 @@ extension MainViewController {
     
     override func setupBindings() {
         super.setupBindings()
-        bindPhotoCollection()
+        observe()
     }
 }
 
@@ -134,14 +140,14 @@ private extension MainViewController {
                 ) as? ImageCell else {
                     print("ERROR: Couldnt dequeue cell with reuse identifier"); return UICollectionViewCell()
                 }
-        
+                
                 self.viewModel.getConcretePhoto(fromURL: photo.urls.thumb) { result in
                     switch result {
                     case .success(let imageData):
                         guard let recievedImage = UIImage(data: imageData) else {
                             print("ERROR: Couldt get recieved image"); return
                         }
-                            
+                        
                         imageCell.configureCell(withImage: recievedImage)
                     case .failure:
                         print("ERROR: Couldnt download image")
@@ -155,7 +161,7 @@ private extension MainViewController {
         var snapshot = NSDiffableDataSourceSnapshot<Section, Photo>()
         snapshot.appendSections([.main])
         snapshot.appendItems(photos)
-
+        
         dataSource.apply(snapshot, animatingDifferences: true)
     }
 }
@@ -164,21 +170,21 @@ private extension MainViewController {
 
 extension MainViewController: UICollectionViewDelegate {
     
-    func collectionView(_ collectionView: UICollectionView, 
+    func collectionView(_ collectionView: UICollectionView,
                         didSelectItemAt indexPath: IndexPath) {
         
         collectionView.layoutIfNeeded()
         print("Selected: \(indexPath.item) / collectionView layout reloaded")
     }
     
-    func collectionView(_ collectionView: UICollectionView, 
+    func collectionView(_ collectionView: UICollectionView,
                         willDisplay cell: UICollectionViewCell,
                         forItemAt indexPath: IndexPath) {
         
         let currentPage = viewModel.queryParameters.currentPage
         let limitPage = viewModel.queryParameters.pagesAmountValue
         let triggerValue = viewModel.photos.count - 2
-
+        
         if indexPath.item == triggerValue && currentPage <= limitPage {
             viewModel.queryParameters.currentPage += 1
             viewModel.getAllPhotos()
@@ -190,7 +196,7 @@ extension MainViewController: CustomLayoutDelegate {
     
     func collectionView(_ collectionView: UICollectionView,
                         heightForImageAtIndexPath indexPath: IndexPath) -> CGFloat {
-
+        
         let receivedImageSize = CGSize(
             width: viewModel.photos[indexPath.item].width,
             height: viewModel.photos[indexPath.item].height
@@ -200,11 +206,18 @@ extension MainViewController: CustomLayoutDelegate {
     }
 }
 
+//extension MainViewController: UISearchBarDelegate {
+//    
+//    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
+//
+//    }
+//}
+
 //MARK: - Prefetching
 
 extension MainViewController: UICollectionViewDataSourcePrefetching {
     
-    func collectionView(_ collectionView: UICollectionView, 
+    func collectionView(_ collectionView: UICollectionView,
                         prefetchItemsAt indexPaths: [IndexPath]) {
         
         indexPaths.forEach {
@@ -224,28 +237,40 @@ extension MainViewController: UISearchResultsUpdating {
         guard
             let searchText = searchController.searchBar.text,
             !searchText.isEmpty,
-            searchText.count > 1 
+            searchText.count > 1
         else {
             return
         }
-
-        DispatchQueue.main.async { [weak self] in
-            self?.viewModel.searchPhotos(
-                withText: searchText.trimmingCharacters(in: .whitespacesAndNewlines),
-                itemsPerPage: 20
-            )
-        }
+        
+        queryTextSubject.send(searchText)
+        
+//        let itemsPerPage = viewModel.queryParameters.pagesAmountValue
+//        
+//        viewModel.searchPhotos(
+//            withText: searchText.trimmingCharacters(in: .whitespacesAndNewlines),
+//            itemsPerPage: itemsPerPage
+//        )
     }
 }
 
 
-//MARK: - Bindings
+//MARK: - Observing
 
 private extension MainViewController {
     
-    func bindPhotoCollection() {
+    func observe() {
         
-        viewModel.$photos
+        let input = MainViewModel.Input(
+            viewDidLoadedPublisher: viewDidLoadSubject.eraseToAnyPublisher(),
+            searchQueryTextPublisher: queryTextSubject.eraseToAnyPublisher()
+        )
+        let output = viewModel.transform(input: input)
+        
+        [output.viewDidLoadedPublisher, output.searchQueryTextPublisher].forEach {
+            $0.sink(receiveValue: { _ in  }).store(in: &cancellables)
+        }
+        
+        output.setDataSourcePublisher
             .drop(while: { $0.count < 1 })
             .receive(on: DispatchQueue.main)
             .sink { [weak self] photos in

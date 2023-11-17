@@ -25,6 +25,7 @@ protocol APIServiceProtocol: AnyObject {
     func searchPhoto(withText
                      text: String,
                      itemsPerPage: Int,
+                     orderedBy: Query.OrderSelection,
                      completion: @escaping (Result<[Photo], RequestError>) -> Void)
 }
 
@@ -106,6 +107,8 @@ extension APIService: APIServiceProtocol {
                 let photos = photoResponseData.map {
                     Photo(
                         id: $0.id,
+                        description: $0.description,
+                        slug: $0.slug,
                         width: $0.width,
                         height: $0.height,
                         urls: $0.urls,
@@ -169,6 +172,8 @@ extension APIService: APIServiceProtocol {
                 let photos = photoResponseData.map {
                     Photo(
                         id: $0.id,
+                        description: $0.description,
+                        slug: $0.slug,
                         width: $0.width,
                         height: $0.height,
                         urls: $0.urls,
@@ -227,6 +232,7 @@ extension APIService: APIServiceProtocol {
     func searchPhoto(withText
                      text: String,
                      itemsPerPage: Int,
+                     orderedBy: Query.OrderSelection,
                      completion: @escaping (Result<[Photo], RequestError>) -> Void) {
         
         guard let url = URLBuilder.buildURL(
@@ -241,6 +247,10 @@ extension APIService: APIServiceProtocol {
                 .init(
                     name: Query.ArgumentName.query.rawValue,
                     value: text
+                ),
+                .init(
+                    name: Query.ArgumentName.ordered_by.rawValue,
+                    value: orderedBy.rawValue
                 )
             ]
         ) else {
@@ -274,6 +284,8 @@ extension APIService: APIServiceProtocol {
                 let photos = photoResponseData.map {
                     Photo(
                         id: $0.id,
+                        description: $0.description,
+                        slug: $0.slug,
                         width: $0.width,
                         height: $0.height,
                         urls: $0.urls,
