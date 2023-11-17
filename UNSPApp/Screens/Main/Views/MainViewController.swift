@@ -9,22 +9,26 @@ import UIKit
 import SnapKit
 import Combine
 
+
 //MARK: - Impl
 
-final class MainViewController: BaseController {
+class MainViewController: BaseController {
     
-    private var viewModel: MainViewModel
+    var viewDidLoadSubject = PassthroughSubject<Void, Never>()
+    var queryTextSubject = PassthroughSubject<String?, Never>()
     
     private let titleLabel = UILabel()
+    
     private let searchController = UISearchController()
     
     private var collectionViewLayout = CustomLayout()
-    private var collectionView: UICollectionView!
-
-    private var dataSource: UICollectionViewDiffableDataSource<Section, Photo>!
+    var collectionView: UICollectionView!
     
-    private var cancellables = Set<AnyCancellable>()
+    private var dataSource: UICollectionViewDiffableDataSource<Section, Photo>!
 
+    private var cancellables = Set<AnyCancellable>()
+    
+    private var viewModel: MainViewModel
     
     //MARK: Init
     
@@ -58,11 +62,16 @@ final class MainViewController: BaseController {
         searchController.searchBar.autocapitalizationType = .none
         searchController.searchBar.autocorrectionType = .no
         searchController.searchBar.searchBarStyle = .minimal
-        searchController.searchResultsUpdater = self
         searchController.obscuresBackgroundDuringPresentation = false
+        searchController.searchResultsUpdater = self
+    }
+    
+    private func setupSearchCancelButtonVisability() {
+        guard let queryText = viewModel.queryText else { return }
+        let searchIsActive = searchController.isActive
+        let isActive = queryText.isEmpty && searchIsActive
         
-        let searchResultController = searchController.searchResultsController
-        searchResultController?.view.backgroundColor = R.Colors.primaryBackgroundColor
+        searchController.searchBar.showsCancelButton = isActive
     }
     
     private func setupCollectionView(withLayout layout: UICollectionViewLayout) {
@@ -73,13 +82,9 @@ final class MainViewController: BaseController {
         collectionView.dataSource = dataSource
         collectionView.showsVerticalScrollIndicator = false
         collectionView.prefetchDataSource = self
+        collectionViewLayout.delegate = self
         collectionView.isPrefetchingEnabled = true
         collectionView.register(ImageCell.self, forCellWithReuseIdentifier: ImageCell.imageCellIdentifier)
-    }
-    
-    private func setupDelegates() {
-        collectionViewLayout.delegate = self
-        collectionView.delegate = self
     }
 }
 
@@ -94,7 +99,7 @@ extension MainViewController {
         setupSearchController()
         setupCollectionView(withLayout: collectionViewLayout)
         setupDataSource()
-        setupDelegates()
+        viewDidLoadSubject.send()
         view.addNewSubview(titleLabel)
         view.addNewSubview(collectionView)
     }
@@ -115,7 +120,42 @@ extension MainViewController {
     
     override func setupBindings() {
         super.setupBindings()
-        bindPhotoCollection()
+        observe()
+    }
+}
+
+//MARK: - Observing
+
+private extension MainViewController {
+    
+    func observe() {
+        
+        let input = MainViewModel.Input(
+            viewDidLoadedPublisher: viewDidLoadSubject.eraseToAnyPublisher(),
+            searchQueryTextPublisher: queryTextSubject.eraseToAnyPublisher()
+        )
+        let output = viewModel.transform(input: input)
+        
+        output.viewDidLoadedPublisher
+            .sink(receiveValue: { _ in  })
+            .store(in: &cancellables)
+        
+        output.searchQueryTextPublisher
+            .sink { [weak self] _ in
+                self?.setupSearchCancelButtonVisability()
+            }
+            .store(in: &cancellables)
+        
+        
+        output.setDataSourcePublisher
+            .drop(while: { $0.count < 1 })
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] photos in
+                DispatchQueue.main.async {
+                    self?.updateSnapshot(withPhotos: photos)
+                }
+            }
+            .store(in: &cancellables)
     }
 }
 
@@ -134,14 +174,14 @@ private extension MainViewController {
                 ) as? ImageCell else {
                     print("ERROR: Couldnt dequeue cell with reuse identifier"); return UICollectionViewCell()
                 }
-        
+                
                 self.viewModel.getConcretePhoto(fromURL: photo.urls.thumb) { result in
                     switch result {
                     case .success(let imageData):
                         guard let recievedImage = UIImage(data: imageData) else {
                             print("ERROR: Couldt get recieved image"); return
                         }
-                            
+                        
                         imageCell.configureCell(withImage: recievedImage)
                     case .failure:
                         print("ERROR: Couldnt download image")
@@ -155,56 +195,17 @@ private extension MainViewController {
         var snapshot = NSDiffableDataSourceSnapshot<Section, Photo>()
         snapshot.appendSections([.main])
         snapshot.appendItems(photos)
-
+        
         dataSource.apply(snapshot, animatingDifferences: true)
     }
 }
 
-//MARK: - Delegates
-
-extension MainViewController: UICollectionViewDelegate {
-    
-    func collectionView(_ collectionView: UICollectionView, 
-                        didSelectItemAt indexPath: IndexPath) {
-        
-        collectionView.layoutIfNeeded()
-        print("Selected: \(indexPath.item) / collectionView layout reloaded")
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, 
-                        willDisplay cell: UICollectionViewCell,
-                        forItemAt indexPath: IndexPath) {
-        
-        let currentPage = viewModel.queryParameters.currentPage
-        let limitPage = viewModel.queryParameters.pagesAmountValue
-        let triggerValue = viewModel.photos.count - 2
-
-        if indexPath.item == triggerValue && currentPage <= limitPage {
-            viewModel.queryParameters.currentPage += 1
-            viewModel.getAllPhotos()
-        }
-    }
-}
-
-extension MainViewController: CustomLayoutDelegate {
-    
-    func collectionView(_ collectionView: UICollectionView,
-                        heightForImageAtIndexPath indexPath: IndexPath) -> CGFloat {
-
-        let receivedImageSize = CGSize(
-            width: viewModel.photos[indexPath.item].width,
-            height: viewModel.photos[indexPath.item].height
-        )
-        let screenWidth = UIScreen.main.bounds.width / 2
-        return (receivedImageSize.height / receivedImageSize.width) * screenWidth
-    }
-}
 
 //MARK: - Prefetching
 
 extension MainViewController: UICollectionViewDataSourcePrefetching {
     
-    func collectionView(_ collectionView: UICollectionView, 
+    func collectionView(_ collectionView: UICollectionView,
                         prefetchItemsAt indexPaths: [IndexPath]) {
         
         indexPaths.forEach {
@@ -216,43 +217,32 @@ extension MainViewController: UICollectionViewDataSourcePrefetching {
     }
 }
 
-//MARK: - Search
+
+//MARK: - Search Results Updating
 
 extension MainViewController: UISearchResultsUpdating {
-    
+
     func updateSearchResults(for searchController: UISearchController) {
-        guard
-            let searchText = searchController.searchBar.text,
-            !searchText.isEmpty,
-            searchText.count > 1 
-        else {
-            return
-        }
-
-        DispatchQueue.main.async { [weak self] in
-            self?.viewModel.searchPhotos(
-                withText: searchText.trimmingCharacters(in: .whitespacesAndNewlines),
-                itemsPerPage: 20
-            )
-        }
-    }
-}
-
-
-//MARK: - Bindings
-
-private extension MainViewController {
-    
-    func bindPhotoCollection() {
         
-        viewModel.$photos
-            .drop(while: { $0.count < 1 })
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] photos in
-                DispatchQueue.main.async {
-                    self?.updateSnapshot(withPhotos: photos)
-                }
-            }
-            .store(in: &cancellables)
+        if let queryText = searchController.searchBar.text {
+            queryTextSubject.send(queryText.trimmingCharacters(in: .whitespacesAndNewlines))
+        }
     }
 }
+
+//MARK: - Custom Layout Delegate
+
+extension MainViewController: CustomLayoutDelegate {
+    
+    func collectionView(_ collectionView: UICollectionView,
+                        heightForImageAtIndexPath indexPath: IndexPath) -> CGFloat {
+        
+        let receivedImageSize = CGSize(
+            width: viewModel.photos[indexPath.item].width,
+            height: viewModel.photos[indexPath.item].height
+        )
+        let screenWidth = UIScreen.main.bounds.width / 2
+        return (receivedImageSize.height / receivedImageSize.width) * screenWidth
+    }
+}
+
