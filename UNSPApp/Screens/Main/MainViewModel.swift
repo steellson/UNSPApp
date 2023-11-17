@@ -74,6 +74,7 @@ final class MainViewModel {
     
     private func setupQueryParameters() {
         queryParameters.perPage = 12
+        queryParameters.perPageSearch = 5
         queryParameters.currentPage = 1
         queryParameters.orderedBy = .latest
     }
@@ -184,7 +185,7 @@ extension MainViewModel {
     }
     
     //MARK: Search photos
-    func searchPhotos(withText text: String, itemsPerPage: Int) {
+    func searchPhotos(withText text: String) {
         guard !text.isEmpty, text.count > 1 else { return }
         
         if state != .loading {
@@ -193,7 +194,7 @@ extension MainViewModel {
         
         apiService.searchPhoto(
             withText: text,
-            itemsPerPage: itemsPerPage,
+            itemsPerPage: queryParameters.perPageSearch,
             orderedBy: queryParameters.orderedBy ?? .latest
         ) { [weak self] result in
             

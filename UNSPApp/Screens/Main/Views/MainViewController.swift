@@ -63,7 +63,6 @@ final class MainViewController: BaseController {
         searchController.searchBar.autocorrectionType = .no
         searchController.searchBar.searchBarStyle = .minimal
         searchController.searchResultsUpdater = self
-//        searchController.searchBar.delegate = self
         searchController.obscuresBackgroundDuringPresentation = true
         
         let searchResultController = searchController.searchResultsController
@@ -78,13 +77,9 @@ final class MainViewController: BaseController {
         collectionView.dataSource = dataSource
         collectionView.showsVerticalScrollIndicator = false
         collectionView.prefetchDataSource = self
+        collectionViewLayout.delegate = self
         collectionView.isPrefetchingEnabled = true
         collectionView.register(ImageCell.self, forCellWithReuseIdentifier: ImageCell.imageCellIdentifier)
-    }
-    
-    private func setupDelegates() {
-        collectionViewLayout.delegate = self
-        collectionView.delegate = self
     }
 }
 
@@ -99,7 +94,6 @@ extension MainViewController {
         setupSearchController()
         setupCollectionView(withLayout: collectionViewLayout)
         setupDataSource()
-        setupDelegates()
         viewDidLoadSubject.send()
         view.addNewSubview(titleLabel)
         view.addNewSubview(collectionView)
@@ -122,6 +116,34 @@ extension MainViewController {
     override func setupBindings() {
         super.setupBindings()
         observe()
+    }
+}
+
+//MARK: - Observing
+
+private extension MainViewController {
+    
+    func observe() {
+        
+        let input = MainViewModel.Input(
+            viewDidLoadedPublisher: viewDidLoadSubject.eraseToAnyPublisher(),
+            searchQueryTextPublisher: queryTextSubject.eraseToAnyPublisher()
+        )
+        let output = viewModel.transform(input: input)
+        
+        [output.viewDidLoadedPublisher, output.searchQueryTextPublisher].forEach {
+            $0.sink(receiveValue: { _ in  }).store(in: &cancellables)
+        }
+        
+        output.setDataSourcePublisher
+            .drop(while: { $0.count < 1 })
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] photos in
+                DispatchQueue.main.async {
+                    self?.updateSnapshot(withPhotos: photos)
+                }
+            }
+            .store(in: &cancellables)
     }
 }
 
@@ -166,52 +188,6 @@ private extension MainViewController {
     }
 }
 
-//MARK: - Delegates
-
-extension MainViewController: UICollectionViewDelegate {
-    
-    func collectionView(_ collectionView: UICollectionView,
-                        didSelectItemAt indexPath: IndexPath) {
-        
-        collectionView.layoutIfNeeded()
-        print("Selected: \(indexPath.item) / collectionView layout reloaded")
-    }
-    
-    func collectionView(_ collectionView: UICollectionView,
-                        willDisplay cell: UICollectionViewCell,
-                        forItemAt indexPath: IndexPath) {
-        
-        let currentPage = viewModel.queryParameters.currentPage
-        let limitPage = viewModel.queryParameters.pagesAmountValue
-        let triggerValue = viewModel.photos.count - 2
-        
-        if indexPath.item == triggerValue && currentPage <= limitPage {
-            viewModel.queryParameters.currentPage += 1
-            viewModel.getAllPhotos()
-        }
-    }
-}
-
-extension MainViewController: CustomLayoutDelegate {
-    
-    func collectionView(_ collectionView: UICollectionView,
-                        heightForImageAtIndexPath indexPath: IndexPath) -> CGFloat {
-        
-        let receivedImageSize = CGSize(
-            width: viewModel.photos[indexPath.item].width,
-            height: viewModel.photos[indexPath.item].height
-        )
-        let screenWidth = UIScreen.main.bounds.width / 2
-        return (receivedImageSize.height / receivedImageSize.width) * screenWidth
-    }
-}
-
-//extension MainViewController: UISearchBarDelegate {
-//    
-//    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
-//
-//    }
-//}
 
 //MARK: - Prefetching
 
@@ -234,50 +210,31 @@ extension MainViewController: UICollectionViewDataSourcePrefetching {
 extension MainViewController: UISearchResultsUpdating {
     
     func updateSearchResults(for searchController: UISearchController) {
-        guard
-            let searchText = searchController.searchBar.text,
-            !searchText.isEmpty,
-            searchText.count > 1
-        else {
+        if let searchText = searchController.searchBar.text,
+           !searchText.isEmpty,
+           searchText.count > 1 {
+            
+            queryTextSubject.send(searchText)
+        } else {
             return
         }
-        
-        queryTextSubject.send(searchText)
-        
-//        let itemsPerPage = viewModel.queryParameters.pagesAmountValue
-//        
-//        viewModel.searchPhotos(
-//            withText: searchText.trimmingCharacters(in: .whitespacesAndNewlines),
-//            itemsPerPage: itemsPerPage
-//        )
     }
 }
 
 
-//MARK: - Observing
+//MARK: - Custom Layout Delegate
 
-private extension MainViewController {
+extension MainViewController: CustomLayoutDelegate {
     
-    func observe() {
+    func collectionView(_ collectionView: UICollectionView,
+                        heightForImageAtIndexPath indexPath: IndexPath) -> CGFloat {
         
-        let input = MainViewModel.Input(
-            viewDidLoadedPublisher: viewDidLoadSubject.eraseToAnyPublisher(),
-            searchQueryTextPublisher: queryTextSubject.eraseToAnyPublisher()
+        let receivedImageSize = CGSize(
+            width: viewModel.photos[indexPath.item].width,
+            height: viewModel.photos[indexPath.item].height
         )
-        let output = viewModel.transform(input: input)
-        
-        [output.viewDidLoadedPublisher, output.searchQueryTextPublisher].forEach {
-            $0.sink(receiveValue: { _ in  }).store(in: &cancellables)
-        }
-        
-        output.setDataSourcePublisher
-            .drop(while: { $0.count < 1 })
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] photos in
-                DispatchQueue.main.async {
-                    self?.updateSnapshot(withPhotos: photos)
-                }
-            }
-            .store(in: &cancellables)
+        let screenWidth = UIScreen.main.bounds.width / 2
+        return (receivedImageSize.height / receivedImageSize.width) * screenWidth
     }
 }
+

@@ -29,6 +29,7 @@ final class Query {
     
     //MARK: Defaults
     var perPage: Int
+    var perPageSearch: Int
     var currentPage: Int
     var queryText: String?
     var count: Int
@@ -38,12 +39,14 @@ final class Query {
     //MARK: Init
     init(
         perPage: Int = 10,
+        perPageSearch: Int = 5,
         currentPage: Int = 1,
         queryText: String? = nil,
         count: Int = 3,
         orderedBy: OrderSelection = .latest
     ) {
         self.perPage = perPage
+        self.perPageSearch = perPageSearch
         self.currentPage = currentPage
         self.queryText = queryText
         self.count = count
@@ -75,14 +78,13 @@ extension Query {
     
     //MARK: Search
     convenience init(
-        perPage: Int,
+        perPageSearch: Int,
         queryText: String,
         orderedBy: Query.OrderSelection
     ) {
         self.init()
-        self.perPage = perPage
+        self.perPageSearch = perPageSearch
         self.queryText = queryText
-        
         self.orderedBy = orderedBy
     }
 }
