@@ -69,9 +69,9 @@ class MainViewController: BaseController {
     private func setupSearchCancelButtonVisability() {
         guard let queryText = viewModel.queryText else { return }
         let searchIsActive = searchController.isActive
-        let isActive = queryText.isEmpty && searchIsActive
+        let isButtonShown = queryText.isEmpty && searchIsActive
         
-        searchController.searchBar.showsCancelButton = isActive
+        searchController.searchBar.showsCancelButton = isButtonShown
     }
     
     private func setupCollectionView(withLayout layout: UICollectionViewLayout) {
@@ -130,15 +130,8 @@ private extension MainViewController {
     
     func observe() {
         
-        let input = MainViewModel.Input(
-            viewDidLoadedPublisher: viewDidLoadSubject.eraseToAnyPublisher(),
-            searchQueryTextPublisher: queryTextSubject.eraseToAnyPublisher()
-        )
+        let input = MainViewModel.Input(searchQueryTextPublisher: queryTextSubject.eraseToAnyPublisher() )
         let output = viewModel.transform(input: input)
-        
-        output.viewDidLoadedPublisher
-            .sink(receiveValue: { _ in  })
-            .store(in: &cancellables)
         
         output.searchQueryTextPublisher
             .sink { [weak self] _ in
@@ -146,13 +139,19 @@ private extension MainViewController {
             }
             .store(in: &cancellables)
         
-        
         output.setDataSourcePublisher
-            .drop(while: { $0.count < 1 })
             .receive(on: DispatchQueue.main)
             .sink { [weak self] photos in
                 DispatchQueue.main.async {
                     self?.updateSnapshot(withPhotos: photos)
+                }
+            }
+            .store(in: &cancellables)
+        
+        output.quitFromSearch
+            .sink { textIsEmpty in
+                if textIsEmpty {
+                    print("Searh text is empty!")
                 }
             }
             .store(in: &cancellables)
@@ -166,23 +165,24 @@ private extension MainViewController {
     func setupDataSource() {
         dataSource = UICollectionViewDiffableDataSource(
             collectionView: collectionView,
-            cellProvider: { (collectionView, indexPath, photo) -> UICollectionViewCell? in
+            cellProvider: { [weak self] (collectionView, indexPath, photo) -> UICollectionViewCell? in
                 
                 guard let imageCell = collectionView.dequeueReusableCell(
                     withReuseIdentifier: ImageCell.imageCellIdentifier,
                     for: indexPath
                 ) as? ImageCell else {
-                    print("ERROR: Couldnt dequeue cell with reuse identifier"); return UICollectionViewCell()
+                    print("ERROR: Couldnt dequeue image cell with reuse identifier"); return UICollectionViewCell()
                 }
-                
-                self.viewModel.getConcretePhoto(fromURL: photo.urls.thumb) { result in
+            
+                self?.viewModel.getConcretePhoto(fromURL: photo.urls.thumb) { result in
                     switch result {
+                        
                     case .success(let imageData):
                         guard let recievedImage = UIImage(data: imageData) else {
                             print("ERROR: Couldt get recieved image"); return
                         }
-                        
                         imageCell.configureCell(withImage: recievedImage)
+                        
                     case .failure:
                         print("ERROR: Couldnt download image")
                     }
@@ -225,10 +225,11 @@ extension MainViewController: UISearchResultsUpdating {
     func updateSearchResults(for searchController: UISearchController) {
         
         if let queryText = searchController.searchBar.text {
-            queryTextSubject.send(queryText.trimmingCharacters(in: .whitespacesAndNewlines))
+            queryTextSubject.send(queryText.lowercased().trimmingCharacters(in: .whitespacesAndNewlines))
         }
     }
 }
+
 
 //MARK: - Custom Layout Delegate
 
@@ -236,7 +237,7 @@ extension MainViewController: CustomLayoutDelegate {
     
     func collectionView(_ collectionView: UICollectionView,
                         heightForImageAtIndexPath indexPath: IndexPath) -> CGFloat {
-        
+
         let receivedImageSize = CGSize(
             width: viewModel.photos[indexPath.item].width,
             height: viewModel.photos[indexPath.item].height

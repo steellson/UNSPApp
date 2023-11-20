@@ -23,19 +23,13 @@ final class MainViewModel {
     //MARK: Input/Output
     
     struct Input {
-        let viewDidLoadedPublisher: AnyPublisher<Void, Never>
         let searchQueryTextPublisher: AnyPublisher<String?, Never>
     }
     
     struct Output {
-        let viewDidLoadedPublisher: AnyPublisher<Void, Never>
         let searchQueryTextPublisher: AnyPublisher<Void, Never>
         let setDataSourcePublisher: AnyPublisher<[Photo], Never>
-    }
-    
-    enum OutputVoid {
-        case didLoadedPublisher
-        case queryTextPublisher
+        let quitFromSearch: AnyPublisher<Bool, Never>
     }
     
     
@@ -73,41 +67,11 @@ final class MainViewModel {
         setupQueryParameters()
         getAllPhotos()
     }
-}
 
-
-//MARK: - Private methods
-
-private extension MainViewModel {
-    
-    func eraseToAnyPublusher(_ input: Input,
-                             withType type: OutputVoid) -> AnyPublisher<Void, Never> {
-        switch type {
-        case .didLoadedPublisher: return input
-                .viewDidLoadedPublisher
-                .handleEvents(
-                    receiveOutput:  { [weak self] _ in
-                        self?.getAllPhotos()
-                    }
-                )
-                .flatMap { Just(()) }
-                .eraseToAnyPublisher()
-        case .queryTextPublisher: return input
-                .searchQueryTextPublisher
-                .handleEvents(
-                    receiveOutput:  { [weak self] queryText in
-                        self?.queryText = queryText
-                    }
-                )
-                .flatMap { _ in Just(()) }
-                .eraseToAnyPublisher()
-                        
-        }
-    }
     
     func setupQueryParameters() {
-        queryParameters.perPage = 12
-        queryParameters.perPageSearch = 5
+        queryParameters.perPage = 5
+        queryParameters.perPageSearch = 2
         queryParameters.currentPage = 1
         queryParameters.orderedBy = .latest
     }
@@ -119,36 +83,41 @@ private extension MainViewModel {
 extension MainViewModel {
     
     func transform(input: Input) -> Output {
-        
-        let viewDidLoadedPublisher = eraseToAnyPublusher(input, withType: .didLoadedPublisher)
-        let searchQueryTextPublisher = eraseToAnyPublusher(input, withType: .queryTextPublisher)
-        let setDataSourcePublisher = Publishers.CombineLatest(
-            $photos.compactMap { $0 },
-            $queryText
-        )
-            .flatMap { (photos: [Photo], queryText: String?) in
-                if let queryText = queryText, !queryText.isEmpty {
-                    let filteredPhotos = photos.filter {
-                        $0.description?
-                            .lowercased()
-                            .contains(queryText)
-                        ?? $0.slug
-                            .replacing("-", with: " ")
-                            .contains(queryText)
+                
+        let searchQueryTextPublisher = input
+            .searchQueryTextPublisher
+            .dropFirst()
+            .removeDuplicates()
+            .debounce(for: 0.5, scheduler: RunLoop.main)
+            .compactMap { $0 }
+            .handleEvents(
+                receiveOutput:  { [weak self] queryText in
+                    if queryText == "" {
+                        self?.photos = []
+                        self?.getAllPhotos()
+                    } else {
+                        self?.searchPhotos(withText: queryText)
                     }
-                    return Just(filteredPhotos)
-                } else {
-                    return Just(photos)
                 }
-            }
+            )
+            .flatMap { _ in Just(()) }
             .eraseToAnyPublisher()
         
+        let setDataSourcePublisher = $photos.eraseToAnyPublisher()
+        
+        let quitFromSearch = input
+            .searchQueryTextPublisher
+            .dropFirst()
+            .compactMap { $0 == "" }
+            .eraseToAnyPublisher()
+
         return Output(
-            viewDidLoadedPublisher: viewDidLoadedPublisher,
             searchQueryTextPublisher: searchQueryTextPublisher,
-            setDataSourcePublisher: setDataSourcePublisher
+            setDataSourcePublisher: setDataSourcePublisher,
+            quitFromSearch: quitFromSearch
         )
     }
+    
     
     //MARK: Get all photos
     func getAllPhotos() {

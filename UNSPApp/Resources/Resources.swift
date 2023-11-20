@@ -18,6 +18,7 @@ enum R {
         
         // Title strings
         case mainScreenTitle = "Pick some image for details ..."
+        case emptyCellTitle = "Images not found :("
         
         // Placeholders
         case searchBarPlaceholder = "Find images here ..."

@@ -24,14 +24,9 @@ final class CustomLayout: UICollectionViewLayout {
     
     //MARK: Variables
     
-    private let numberOfColumns = 2
-    private let cellPadding: CGFloat = 0
+    var contentHeight: CGFloat = 0
     
-    private var cache: [UICollectionViewLayoutAttributes] = []
-    
-    private var contentHeight: CGFloat = 0
-    
-    private var contentWidth: CGFloat {
+    var contentWidth: CGFloat {
         guard let collectionView = collectionView else {
             return 0
         }
@@ -39,15 +34,21 @@ final class CustomLayout: UICollectionViewLayout {
         return collectionView.bounds.width - (insets.left + insets.right)
     }
     
+    private let numberOfColumns = 2
+    private let cellPadding: CGFloat = 0
     
-    //MARK: Overrided
+    private var cache: [UICollectionViewLayoutAttributes] = []
     
     override var collectionViewContentSize: CGSize {
         return CGSize(width: contentWidth, height: contentHeight)
     }
     
+    
+    //MARK: Prepare
+    
     override func prepare() {
-        cache = []
+        restoreAttributesCache()
+        
         guard let collectionView = collectionView else { return }
         
         let columnWidth = contentWidth / CGFloat(numberOfColumns)
@@ -87,6 +88,22 @@ final class CustomLayout: UICollectionViewLayout {
         }
     }
     
+    
+    //MARK: Offset
+    
+    override func targetContentOffset(forProposedContentOffset proposedContentOffset: CGPoint) -> CGPoint {
+        if let collectionView = self.collectionView {
+            let currentContentOffset = collectionView.contentOffset
+                if currentContentOffset.y < proposedContentOffset.y {
+                    return currentContentOffset
+                }
+        }
+        return proposedContentOffset    
+    }
+    
+    
+    //MARK: Layout Attributes For Elements
+    
     override func layoutAttributesForElements(in rect: CGRect) -> [UICollectionViewLayoutAttributes]? {
         var visibleLayoutAttributes: [UICollectionViewLayoutAttributes] = []
         
@@ -98,7 +115,20 @@ final class CustomLayout: UICollectionViewLayout {
         return visibleLayoutAttributes
     }
     
+    
+    //MARK: Layout Attributes For Item
+    
     override func layoutAttributesForItem(at indexPath: IndexPath) -> UICollectionViewLayoutAttributes? {
         return cache[indexPath.item]
+    }
+}
+
+
+//MARK: - Restore cache
+
+extension CustomLayout {
+    
+    func restoreAttributesCache() {
+        self.cache = []
     }
 }
