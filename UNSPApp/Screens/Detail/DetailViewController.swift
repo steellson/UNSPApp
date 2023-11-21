@@ -13,7 +13,7 @@ import UIKit
 final class DetailViewController: BaseController {
     
     private let viewModel: DetailViewModel
-    
+            
     private let tapGesture = UITapGestureRecognizer()
     private let imageView = UIImageView()
     
@@ -69,7 +69,7 @@ extension DetailViewController {
         super.setupView()
         setupContentView()
         setupTapGesture()
-        setupImageView()
+        setupImageView()        
     }
     
     override func setupLayout() {
@@ -82,11 +82,4 @@ extension DetailViewController {
             height: view.bounds.height
         )
     }
-}
-
-
-//MARK: - Observe
-
-private extension DetailViewController {
-    
 }

@@ -17,12 +17,11 @@ class MainViewController: BaseController {
     private let searchController = UISearchController()
     
     private let titleLabel = UILabel()
-    
-    private let transition = CustomTransition()
-    
+        
     private var collectionView: UICollectionView!
     private var collectionViewLayout = CustomLayout()
     
+    private let transition = CustomTransition(transitionType: .present, duration: 2.0)
     
     private var dataSource: UICollectionViewDiffableDataSource<Section, Photo>!
     
@@ -266,4 +265,3 @@ extension MainViewController: CustomLayoutDelegate {
         return (receivedImageSize.height / receivedImageSize.width) * screenWidth
     }
 }
-
