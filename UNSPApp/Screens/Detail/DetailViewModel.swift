@@ -11,11 +11,11 @@ import Foundation
 
 final class DetailViewModel {
     
-    private let photo: Photo
+    private let imageData: Data
     
     init(
-        photo: Photo
+        imageData: Data
     ) {
-        self.photo = photo
+        self.imageData = imageData
     }
 }

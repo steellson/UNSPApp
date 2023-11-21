@@ -29,7 +29,7 @@ final class Assembly: AssemblyProtocol {
     
     enum Module {
         case main
-        case detail(Photo)
+        case detail(Data)
     }
     
     
@@ -43,8 +43,8 @@ final class Assembly: AssemblyProtocol {
             let viewController = MainViewController(viewModel: viewModel)
             return viewController
             
-        case .detail(let photo):
-            let viewModel = DetailViewModel(photo: photo)
+        case .detail(let data):
+            let viewModel = DetailViewModel(imageData: data)
             let viewController = DetailViewController(viewModel: viewModel)
             return viewController
         }

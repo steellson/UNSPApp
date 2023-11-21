@@ -8,12 +8,16 @@
 import Foundation
 import UIKit
 import SnapKit
+import Combine
+
 
 //MARK: - Impl
 
 final class ImageCell: BaseCell {
 
     static let imageCellIdentifier = R.Strings.imageCellIdentifier.rawValue
+    
+    private let tapRecognizer = UITapGestureRecognizer()
     
     private let activityIndicator: UIActivityIndicatorView = {
         let indicator = UIActivityIndicatorView()
@@ -24,6 +28,10 @@ final class ImageCell: BaseCell {
     }()
     
     private let imageView = UIImageView()
+    
+    var didTapSubject = PassthroughSubject<Data, Never>()
+    var cancellables = Set<AnyCancellable>()
+    
     
     
     func configureCell(withImage image: UIImage) {
@@ -43,6 +51,7 @@ final class ImageCell: BaseCell {
         contentView.clipsToBounds = true
         contentView.layer.masksToBounds = true
         contentView.translatesAutoresizingMaskIntoConstraints = false
+        contentView.addGestureRecognizer(tapRecognizer)
         contentView.addNewSubview(activityIndicator)
         contentView.addNewSubview(imageView)
     }
@@ -62,6 +71,18 @@ final class ImageCell: BaseCell {
         imageView.contentMode = .scaleAspectFit
         imageView.tintColor = .black
     }
+    
+    private func setupTapGesture() {
+        tapRecognizer.addTarget(self, action: #selector(didTapped))
+    }
+    
+    @objc private func didTapped() {
+        guard let image = imageView.image,
+              let data = image.jpegData(compressionQuality: 1)
+        else { return }
+            
+        didTapSubject.send(data)
+    }
 }
             
 //MARK: - Base
@@ -73,6 +94,7 @@ extension ImageCell {
         setupContentView()
         setupImageView()
         setupActivityIndicator()
+        setupTapGesture()
     }
     
     override func setupCellLayout() {
@@ -91,5 +113,9 @@ extension ImageCell {
             $0.edges.equalToSuperview()
         }
     }
+    
+    override func clearCell() {
+        super.clearCell()
+        cancellables.removeAll()
+    }
 }
-

@@ -87,6 +87,14 @@ class MainViewController: BaseController {
         collectionView.isPrefetchingEnabled = true
         collectionView.register(ImageCell.self, forCellWithReuseIdentifier: ImageCell.imageCellIdentifier)
     }
+    
+    private func subscribeForTransitionToDetail(fromCell cell: ImageCell) {
+        cell.didTapSubject.sink(receiveValue: { photo in
+            let detailModule = Assembly.builder.build(module: .detail(photo))
+            self.present(detailModule, animated: true)
+        })
+        .store(in: &cell.cancellables)
+    }
 }
 
 
@@ -131,7 +139,7 @@ private extension MainViewController {
     
     func observe() {
         
-        let input = MainViewModel.Input(searchQueryTextPublisher: queryTextSubject.eraseToAnyPublisher() )
+        let input = MainViewModel.Input(searchQueryTextPublisher: queryTextSubject.eraseToAnyPublisher())
         let output = viewModel.transform(input: input)
         
         output.searchQueryTextPublisher
@@ -174,7 +182,8 @@ private extension MainViewController {
                 ) as? ImageCell else {
                     print("ERROR: Couldnt dequeue image cell with reuse identifier"); return UICollectionViewCell()
                 }
-            
+                
+                //MARK: Download image data (THUMB)
                 self?.viewModel.getConcretePhoto(fromURL: photo.urls.thumb) { result in
                     switch result {
                         
@@ -188,6 +197,10 @@ private extension MainViewController {
                         print("ERROR: Couldnt download image")
                     }
                 }
+                
+                //MARK: Tap reaction / Transition
+                self?.subscribeForTransitionToDetail(fromCell: imageCell)
+                
                 return imageCell
             })
     }
