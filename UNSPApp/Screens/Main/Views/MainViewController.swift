@@ -28,7 +28,8 @@ class MainViewController: BaseController {
 
     private var cancellables = Set<AnyCancellable>()
     
-    private var viewModel: MainViewModel
+    private let viewModel: MainViewModel
+    
     
     //MARK: Init
     
