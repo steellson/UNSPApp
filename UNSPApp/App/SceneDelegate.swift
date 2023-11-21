@@ -11,14 +11,13 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     var window: UIWindow?
 
-    private let apiService: APIServiceProtocol = APIService()
+    private let builder: AssemblyProtocol = Assembly()
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         guard let windowScene = (scene as? UIWindowScene) else { return }
         let window = UIWindow(windowScene: windowScene)
-        let viewModel = MainViewModel(apiService: self.apiService)
-        let viewController = MainViewController(viewModel: viewModel)
-        let navigationController = UINavigationController(rootViewController: viewController)
+        let view = builder.build(module: .main)
+        let navigationController = UINavigationController(rootViewController: view)
         
         window.rootViewController = navigationController
         window.makeKeyAndVisible()

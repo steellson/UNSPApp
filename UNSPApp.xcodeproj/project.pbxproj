@@ -31,6 +31,7 @@
 		3DEAFF602B04F84B004CAE97 /* Query.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DEAFF5F2B04F84B004CAE97 /* Query.swift */; };
 		3DEAFF752B0C8A3A004CAE97 /* DetailViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DEAFF742B0C8A3A004CAE97 /* DetailViewModel.swift */; };
 		3DEAFF772B0C8A44004CAE97 /* DetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DEAFF762B0C8A44004CAE97 /* DetailViewController.swift */; };
+		3DEAFF792B0C92A5004CAE97 /* Assembly.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DEAFF782B0C92A5004CAE97 /* Assembly.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -59,6 +60,7 @@
 		3DEAFF5F2B04F84B004CAE97 /* Query.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Query.swift; sourceTree = "<group>"; };
 		3DEAFF742B0C8A3A004CAE97 /* DetailViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailViewModel.swift; sourceTree = "<group>"; };
 		3DEAFF762B0C8A44004CAE97 /* DetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailViewController.swift; sourceTree = "<group>"; };
+		3DEAFF782B0C92A5004CAE97 /* Assembly.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Assembly.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -107,6 +109,7 @@
 		3D8255122AE6A8BC00D84FC7 /* App */ = {
 			isa = PBXGroup;
 			children = (
+				3DEAFF782B0C92A5004CAE97 /* Assembly.swift */,
 				3D8254FE2AE6A03E00D84FC7 /* AppDelegate.swift */,
 				3D8255002AE6A03E00D84FC7 /* SceneDelegate.swift */,
 				3D8255202AE6B09C00D84FC7 /* Base */,
@@ -156,7 +159,6 @@
 			isa = PBXGroup;
 			children = (
 				3D8255262AE6B32000D84FC7 /* APIService.swift */,
-				3DEAFF5F2B04F84B004CAE97 /* Query.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -203,6 +205,7 @@
 			isa = PBXGroup;
 			children = (
 				3D8255432AEE604400D84FC7 /* URLBuilder.swift */,
+				3DEAFF5F2B04F84B004CAE97 /* Query.swift */,
 			);
 			path = Helpers;
 			sourceTree = "<group>";
@@ -301,6 +304,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				3D8255032AE6A03E00D84FC7 /* MainViewController.swift in Sources */,
+				3DEAFF792B0C92A5004CAE97 /* Assembly.swift in Sources */,
 				3D8255272AE6B32000D84FC7 /* APIService.swift in Sources */,
 				3D8255172AE6A92700D84FC7 /* Resources.swift in Sources */,
 				3D4805D52B00FC6500EC98A6 /* UIImage+Extension.swift in Sources */,
