@@ -32,6 +32,7 @@
 		3DEAFF752B0C8A3A004CAE97 /* DetailViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DEAFF742B0C8A3A004CAE97 /* DetailViewModel.swift */; };
 		3DEAFF772B0C8A44004CAE97 /* DetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DEAFF762B0C8A44004CAE97 /* DetailViewController.swift */; };
 		3DEAFF792B0C92A5004CAE97 /* Assembly.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DEAFF782B0C92A5004CAE97 /* Assembly.swift */; };
+		3DEAFF7D2B0CBA9B004CAE97 /* CustomTransition.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DEAFF7C2B0CBA9B004CAE97 /* CustomTransition.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -61,6 +62,7 @@
 		3DEAFF742B0C8A3A004CAE97 /* DetailViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailViewModel.swift; sourceTree = "<group>"; };
 		3DEAFF762B0C8A44004CAE97 /* DetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailViewController.swift; sourceTree = "<group>"; };
 		3DEAFF782B0C92A5004CAE97 /* Assembly.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Assembly.swift; sourceTree = "<group>"; };
+		3DEAFF7C2B0CBA9B004CAE97 /* CustomTransition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomTransition.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -214,6 +216,7 @@
 			isa = PBXGroup;
 			children = (
 				3D4805D82B0346F000EC98A6 /* CustomLayout.swift */,
+				3DEAFF7C2B0CBA9B004CAE97 /* CustomTransition.swift */,
 			);
 			path = Custom;
 			sourceTree = "<group>";
@@ -322,6 +325,7 @@
 				3D82553E2AE94F7000D84FC7 /* Sections.swift in Sources */,
 				3DEAFF752B0C8A3A004CAE97 /* DetailViewModel.swift in Sources */,
 				3D8254FF2AE6A03E00D84FC7 /* AppDelegate.swift in Sources */,
+				3DEAFF7D2B0CBA9B004CAE97 /* CustomTransition.swift in Sources */,
 				3D8255012AE6A03E00D84FC7 /* SceneDelegate.swift in Sources */,
 				3D82552C2AE6BC8D00D84FC7 /* MainViewModel.swift in Sources */,
 				3D82553A2AE909B100D84FC7 /* ImageCell.swift in Sources */,

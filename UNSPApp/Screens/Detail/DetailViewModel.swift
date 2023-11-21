@@ -7,6 +7,7 @@
 
 import Foundation
 
+
 //MARK: - Impl
 
 final class DetailViewModel {
@@ -17,5 +18,10 @@ final class DetailViewModel {
         imageData: Data
     ) {
         self.imageData = imageData
+    }
+    
+    
+    func getImageData() -> Data {
+        imageData
     }
 }

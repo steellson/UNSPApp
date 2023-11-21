@@ -35,20 +35,28 @@ final class DetailViewController: BaseController {
     //MARK: - Setup
     
     private func setupContentView() {
+        view.backgroundColor = .black.withAlphaComponent(0.8)
+        view.addGestureRecognizer(tapGesture)
         view.addSubview(imageView)
     }
     
     private func setupTapGesture() {
-        
+        tapGesture.addTarget(self, action: #selector(didTapped))
     }
     
     private func setupImageView() {
         imageView.contentMode = .scaleAspectFit
-        imageView.addGestureRecognizer(tapGesture)
+        
+        let imageData = viewModel.getImageData()
+        imageView.image = convertImage(fromData: imageData)
     }
     
-    private func setDelegates() {
-        
+    private func convertImage(fromData data: Data) -> UIImage {
+        UIImage(data: data) ?? UIImage(named: "ximage")!
+    }
+    
+    @objc private func didTapped() {
+        self.dismiss(animated: true)
     }
 }
 
@@ -62,15 +70,14 @@ extension DetailViewController {
         setupContentView()
         setupTapGesture()
         setupImageView()
-        setDelegates()
     }
     
     override func setupLayout() {
         super.setupLayout()
         
         imageView.frame = CGRect(
-            x: view.center.x,
-            y: view.center.y,
+            x: .zero,
+            y: .zero,
             width: view.bounds.width,
             height: view.bounds.height
         )
@@ -81,11 +88,5 @@ extension DetailViewController {
 //MARK: - Observe
 
 private extension DetailViewController {
-    
-}
-
-//MARK: - Transitioning Delegate
-
-extension DetailViewController: UIViewControllerTransitioningDelegate {
     
 }

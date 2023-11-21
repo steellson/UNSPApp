@@ -14,12 +14,15 @@ import Combine
 
 class MainViewController: BaseController {
     
-    private let titleLabel = UILabel()
-    
     private let searchController = UISearchController()
     
-    private var collectionViewLayout = CustomLayout()
+    private let titleLabel = UILabel()
+    
+    private let transition = CustomTransition()
+    
     private var collectionView: UICollectionView!
+    private var collectionViewLayout = CustomLayout()
+    
     
     private var dataSource: UICollectionViewDiffableDataSource<Section, Photo>!
     
@@ -89,9 +92,12 @@ class MainViewController: BaseController {
     }
     
     private func subscribeForTransitionToDetail(fromCell cell: ImageCell) {
-        cell.didTapSubject.sink(receiveValue: { photo in
+        cell.didTapSubject.sink(receiveValue: { [weak self] photo in
+            
             let detailModule = Assembly.builder.build(module: .detail(photo))
-            self.present(detailModule, animated: true)
+            detailModule.transitioningDelegate = self?.transition
+            detailModule.modalPresentationStyle = .custom
+            self?.present(detailModule, animated: true)
         })
         .store(in: &cell.cancellables)
     }
@@ -183,8 +189,8 @@ private extension MainViewController {
                     print("ERROR: Couldnt dequeue image cell with reuse identifier"); return UICollectionViewCell()
                 }
                 
-                //MARK: Download image data (THUMB)
-                self?.viewModel.getConcretePhoto(fromURL: photo.urls.thumb) { result in
+                //MARK: Download image data (SMALL)
+                self?.viewModel.getConcretePhoto(fromURL: photo.urls.small) { result in
                     switch result {
                         
                     case .success(let imageData):
