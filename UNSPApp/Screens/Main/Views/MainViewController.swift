@@ -32,9 +32,7 @@ class MainViewController: BaseController {
     private var selectedCell: ImageCell?
     
     private var startingAnimationPoint: CGPoint {
-        guard let centerPoint = self.selectedCell?.center else {
-            return .zero
-        }
+        let centerPoint = self.collectionView.center
         let collectionViewYOffeset = self.collectionView.frame.origin.y
         
         return CGPoint(
@@ -175,7 +173,9 @@ private extension MainViewController {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] photos in
                 DispatchQueue.main.async {
-                    self?.updateSnapshot(withPhotos: photos)
+                    UIView.animate(withDuration: 0.5) {
+                        self?.updateSnapshot(withPhotos: photos)
+                    }
                 }
             }
             .store(in: &cancellables)
@@ -235,7 +235,7 @@ private extension MainViewController {
         snapshot.appendSections([.main])
         snapshot.appendItems(photos)
         
-        dataSource.apply(snapshot, animatingDifferences: true)
+        self.dataSource.apply(snapshot, animatingDifferences: true)
     }
 }
 
@@ -295,7 +295,7 @@ extension MainViewController: UIViewControllerTransitioningDelegate {
                              source: UIViewController) -> UIViewControllerAnimatedTransitioning? {
         CustomTransition(
             transitionType: .present,
-            duration: 0.6,
+            duration: 0.5,
             statringPoint: startingAnimationPoint
         )
     }
@@ -304,7 +304,7 @@ extension MainViewController: UIViewControllerTransitioningDelegate {
                              dismissed: UIViewController) -> UIViewControllerAnimatedTransitioning? {
         CustomTransition(
             transitionType: .dismiss,
-            duration: 0.4,
+            duration: 0.5,
             statringPoint: startingAnimationPoint
         )
     }

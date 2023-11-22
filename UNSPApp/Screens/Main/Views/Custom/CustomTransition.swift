@@ -63,9 +63,12 @@ final class CustomTransition: NSObject {
             ) {
                 view.center = center
                 view.transform = CGAffineTransform.identity
-                view.backgroundColor = bgColor
-                
             } completion: { finished in
+                
+                UIView.animate(withDuration: self.duration) {
+                    view.backgroundColor = bgColor
+                }
+                
                 context.completeTransition(finished)
                 print(R.Strings.animatedTransitionCompleted.rawValue)
             }
@@ -76,7 +79,6 @@ final class CustomTransition: NSObject {
             context.containerView.addSubview(view)
 
             // Process
-            
             UIView.animate(withDuration: 0.2) {
                 
                 view.backgroundColor = .clear

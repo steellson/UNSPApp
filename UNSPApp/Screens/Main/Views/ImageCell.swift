@@ -50,7 +50,7 @@ final class ImageCell: BaseCell {
     private func setupContentView() {
         contentView.backgroundColor = .systemBackground.withAlphaComponent(0.5)
         contentView.layer.borderColor = UIColor.systemGray.cgColor
-        contentView.layer.borderWidth = 0.5
+        contentView.layer.borderWidth = 0.3
         contentView.clipsToBounds = true
         contentView.layer.masksToBounds = true
         contentView.translatesAutoresizingMaskIntoConstraints = false
