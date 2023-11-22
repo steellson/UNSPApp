@@ -61,14 +61,12 @@ final class CustomTransition: NSObject {
                 delay: 0.1,
                 options: [.curveEaseOut, .transitionCurlDown]
             ) {
+                
+                view.backgroundColor = bgColor
                 view.center = center
                 view.transform = CGAffineTransform.identity
+                
             } completion: { finished in
-                
-                UIView.animate(withDuration: self.duration) {
-                    view.backgroundColor = bgColor
-                }
-                
                 context.completeTransition(finished)
                 print(R.Strings.animatedTransitionCompleted.rawValue)
             }
