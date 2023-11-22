@@ -21,16 +21,19 @@ final class CustomTransition: NSObject {
     
     private var transitionType: TransitionType
     private let duration: TimeInterval
+    private let statringPoint: CGPoint
     
     
     //MARK: Init
     
     init(
         transitionType: TransitionType,
-        duration: TimeInterval
+        duration: TimeInterval,
+        statringPoint: CGPoint
     ) {
         self.transitionType = transitionType
         self.duration = duration
+        self.statringPoint = statringPoint
     }
     
     
@@ -42,6 +45,9 @@ final class CustomTransition: NSObject {
                                      typeOfTransition type: TransitionType) {
         switch type {
         case .present:
+            let center = view.center
+            view.center = self.statringPoint
+            
             view.transform = CGAffineTransform(scaleX: 0.01, y: 0.01)
             context.containerView.addSubview(view)
             
@@ -50,7 +56,7 @@ final class CustomTransition: NSObject {
                 delay: 0.1,
                 options: [.curveEaseOut]
             ) {
-                
+                view.center = center
                 view.transform = CGAffineTransform.identity
                 
             } completion: { finished in
@@ -67,6 +73,7 @@ final class CustomTransition: NSObject {
                 options: [.curveEaseOut]
             ) {
                 
+                view.center = self.statringPoint
                 view.transform = CGAffineTransform(scaleX: 0.01, y: 0.01)
                 
             } completion: { finished in

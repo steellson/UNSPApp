@@ -9,6 +9,8 @@ import UIKit
 import SnapKit
 import Combine
 
+typealias DataSource = UICollectionViewDiffableDataSource<Section, Photo>
+typealias DataSourceSnapshot = NSDiffableDataSourceSnapshot<Section, Photo>
 
 //MARK: - Impl
 
@@ -17,18 +19,33 @@ class MainViewController: BaseController {
     private let searchController = UISearchController()
     
     private let titleLabel = UILabel()
-        
+    
     private var collectionView: UICollectionView!
     private var collectionViewLayout = CustomLayout()
-        
-    private var dataSource: UICollectionViewDiffableDataSource<Section, Photo>!
+    
+    private var dataSource: DataSource!
     
     private var viewDidLoadSubject = PassthroughSubject<Void, Never>()
     private var queryTextSubject = PassthroughSubject<String?, Never>()
-
+    
     private var cancellables = Set<AnyCancellable>()
     
     private let viewModel: MainViewModel
+    
+    private var selectedCell: ImageCell?
+    
+    private var startingAnimationPoint: CGPoint {
+        guard let centerPoint = self.selectedCell?.center else {
+            return .zero
+        }
+        let collectionViewHeight = self.collectionView.frame.height
+        let collectionViewYOffeset = self.collectionView.frame.origin.y
+        
+        return CGPoint(
+            x: centerPoint.x,
+            y: centerPoint.y + collectionViewHeight + collectionViewYOffeset
+        )
+    }
     
     
     //MARK: Init
@@ -89,8 +106,15 @@ class MainViewController: BaseController {
     }
     
     private func subscribeForTransitionToDetail(fromCell cell: ImageCell) {
-        cell.didTapSubject.sink(receiveValue: { [weak self] photo in
+        cell.didTapSubject.sink(receiveValue: { [weak self] photo, indexPath in
             
+            // Transition point preparing
+            guard
+                let cellForIndexPath = self?.collectionView.cellForItem(at: indexPath) as? ImageCell
+            else { return }
+            self?.selectedCell = cellForIndexPath
+            
+            // Transition
             let detailModule = Assembly.builder.build(module: .detail(photo))
             detailModule.transitioningDelegate = self
             detailModule.modalPresentationStyle = .custom
@@ -178,7 +202,7 @@ private extension MainViewController {
         dataSource = UICollectionViewDiffableDataSource(
             collectionView: collectionView,
             cellProvider: { [weak self] (collectionView, indexPath, photo) -> UICollectionViewCell? in
-                
+
                 guard let imageCell = collectionView.dequeueReusableCell(
                     withReuseIdentifier: ImageCell.imageCellIdentifier,
                     for: indexPath
@@ -188,14 +212,16 @@ private extension MainViewController {
                 
                 //MARK: Download image data (SMALL)
                 self?.viewModel.getConcretePhoto(fromURL: photo.urls.small) { result in
+                    
                     switch result {
-                        
                     case .success(let imageData):
                         guard let recievedImage = UIImage(data: imageData) else {
                             print("ERROR: Couldt get recieved image"); return
                         }
-                        imageCell.configureCell(withImage: recievedImage)
-                        
+                        imageCell.configureCell(
+                            withImage: recievedImage,
+                            indexPath: indexPath
+                        )
                     case .failure:
                         print("ERROR: Couldnt download image")
                     }
@@ -209,7 +235,7 @@ private extension MainViewController {
     }
     
     func updateSnapshot(withPhotos photos: [Photo]) {
-        var snapshot = NSDiffableDataSourceSnapshot<Section, Photo>()
+        var snapshot = DataSourceSnapshot()
         snapshot.appendSections([.main])
         snapshot.appendItems(photos)
         
@@ -271,13 +297,19 @@ extension MainViewController: UIViewControllerTransitioningDelegate {
     func animationController(forPresented presented: UIViewController,
                              presenting: UIViewController,
                              source: UIViewController) -> UIViewControllerAnimatedTransitioning? {
-        
-        CustomTransition(transitionType: .present, duration: 1.0)
+        CustomTransition(
+            transitionType: .present,
+            duration: 0.8,
+            statringPoint: startingAnimationPoint
+        )
     }
     
     func animationController(forDismissed
                              dismissed: UIViewController) -> UIViewControllerAnimatedTransitioning? {
-        
-        CustomTransition(transitionType: .dismiss, duration: 0.6)
+        CustomTransition(
+            transitionType: .dismiss, 
+            duration: 0.4,
+            statringPoint: startingAnimationPoint
+        )
     }
 }

@@ -10,11 +10,12 @@ import UIKit
 import SnapKit
 import Combine
 
+typealias ImageCellOutput = (Data, IndexPath)
 
 //MARK: - Impl
 
 final class ImageCell: BaseCell {
-
+    
     static let imageCellIdentifier = R.Strings.imageCellIdentifier.rawValue
     
     private let tapRecognizer = UITapGestureRecognizer()
@@ -29,14 +30,16 @@ final class ImageCell: BaseCell {
     
     private let imageView = UIImageView()
     
-    var didTapSubject = PassthroughSubject<Data, Never>()
+    var didTapSubject = PassthroughSubject<ImageCellOutput, Never>()
     var cancellables = Set<AnyCancellable>()
     
+    var indexPath: IndexPath?
     
     
-    func configureCell(withImage image: UIImage) {
+    func configureCell(withImage image: UIImage, indexPath: IndexPath) {
         DispatchQueue.main.async { [weak self] in
             self?.imageView.image = image
+            self?.indexPath = indexPath
             self?.setupActivityIndicator()
         }
     }
@@ -78,10 +81,13 @@ final class ImageCell: BaseCell {
     
     @objc private func didTapped() {
         guard let image = imageView.image,
-              let data = image.jpegData(compressionQuality: 1)
+              let data = image.jpegData(compressionQuality: 1),
+              let indexPath = indexPath
         else { return }
             
-        didTapSubject.send(data)
+        let output = ImageCellOutput(data, indexPath)
+        
+        didTapSubject.send(output)
     }
 }
             
