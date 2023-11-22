@@ -16,10 +16,8 @@ typealias DataSourceSnapshot = NSDiffableDataSourceSnapshot<Section, Photo>
 
 class MainViewController: BaseController {
     
-    private let searchController = UISearchController()
-    
     private let titleLabel = UILabel()
-    
+    private let searchController = UISearchController()
     private var collectionView: UICollectionView!
     private var collectionViewLayout = CustomLayout()
     
@@ -27,7 +25,6 @@ class MainViewController: BaseController {
     
     private var viewDidLoadSubject = PassthroughSubject<Void, Never>()
     private var queryTextSubject = PassthroughSubject<String?, Never>()
-    
     private var cancellables = Set<AnyCancellable>()
     
     private let viewModel: MainViewModel
@@ -38,12 +35,11 @@ class MainViewController: BaseController {
         guard let centerPoint = self.selectedCell?.center else {
             return .zero
         }
-        let collectionViewHeight = self.collectionView.frame.height
         let collectionViewYOffeset = self.collectionView.frame.origin.y
         
         return CGPoint(
             x: centerPoint.x,
-            y: centerPoint.y + collectionViewHeight + collectionViewYOffeset
+            y: centerPoint.y + collectionViewYOffeset
         )
     }
     

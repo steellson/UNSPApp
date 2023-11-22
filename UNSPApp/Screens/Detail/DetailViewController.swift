@@ -35,7 +35,7 @@ final class DetailViewController: BaseController {
     //MARK: - Setup
     
     private func setupContentView() {
-        view.backgroundColor = .black.withAlphaComponent(0.8)
+        view.backgroundColor = .black.withAlphaComponent(0.9)
         view.addGestureRecognizer(tapGesture)
         view.addSubview(imageView)
     }

@@ -45,34 +45,47 @@ final class CustomTransition: NSObject {
                                      typeOfTransition type: TransitionType) {
         switch type {
         case .present:
-            let center = view.center
-            view.center = self.statringPoint
             
+            let center = view.center
+            let bgColor = view.backgroundColor
+            
+            // Prepare to animation
+            view.center = self.statringPoint
+            view.backgroundColor = .clear
             view.transform = CGAffineTransform(scaleX: 0.01, y: 0.01)
             context.containerView.addSubview(view)
             
+            // Process
             UIView.animate(
                 withDuration: duration,
                 delay: 0.1,
-                options: [.curveEaseOut]
+                options: [.curveEaseOut, .transitionCurlDown]
             ) {
+                
                 view.center = center
+                view.backgroundColor = bgColor
                 view.transform = CGAffineTransform.identity
                 
             } completion: { finished in
+                
                 context.completeTransition(finished)
                 print(R.Strings.animatedTransitionCompleted.rawValue)
             }
             
         case .dismiss:
+            
+            // Prepare to animation
             context.containerView.addSubview(view)
 
+            
+            // Process
             UIView.animate(
                 withDuration: duration,
                 delay: 0.1,
-                options: [.curveEaseOut]
+                options: [.curveEaseIn, .transitionCurlUp]
             ) {
                 
+                view.backgroundColor = .clear
                 view.center = self.statringPoint
                 view.transform = CGAffineTransform(scaleX: 0.01, y: 0.01)
                 
@@ -95,7 +108,6 @@ extension CustomTransition: UIViewControllerAnimatedTransitioning {
     }
     
     func animateTransition(using transitionContext: UIViewControllerContextTransitioning) {
-    
         switch transitionType {
         case .present:
             guard let presentedView = transitionContext.view(forKey: .to) else {
