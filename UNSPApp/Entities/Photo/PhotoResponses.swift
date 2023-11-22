@@ -1,11 +1,13 @@
 //
-//  GetPhotosResponseElement.swift
+//  PhotoResponses.swift
 //  UNSPApp
 //
 //  Created by Andrew Steellson on 24.10.2023.
 //
 
 import Foundation
+
+//MARK: - Get photos
 
 typealias GetPhotosResponse = [GetPhotosResponseElement]
 
@@ -36,6 +38,21 @@ struct GetPhotosResponseElement: Decodable {
         case likedByUser = "liked_by_user"
     }
 }
+
+
+//MARK: - Search photos
+
+struct SearchPhotosResponse: Decodable {
+    let total, totalPages: Int
+    let results: [GetPhotosResponseElement]?
+
+    enum CodingKeys: String, CodingKey {
+        case total
+        case totalPages = "total_pages"
+        case results
+    }
+}
+
 
 
 // MARK: - Urls

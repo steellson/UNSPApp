@@ -70,8 +70,8 @@ final class MainViewModel {
 
     
     func setupQueryParameters() {
-        queryParameters.perPage = 11
-        queryParameters.perPageSearch = 6
+        queryParameters.perPage = 10
+        queryParameters.perPageSearch = 10
         queryParameters.currentPage = 1
         queryParameters.orderedBy = .latest
     }

@@ -21,6 +21,7 @@ enum URLHost: String {
 enum APIPath: String {
     case getPhotos = "/photos"
     case getRandomPhotos = "/photos/random"
+    case searchPhotos = "/search/photos"
 }
 
 //MARK: - Builder

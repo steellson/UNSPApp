@@ -238,7 +238,7 @@ extension APIService: APIServiceProtocol {
         guard let url = URLBuilder.buildURL(
             with: .https,
             host: .main,
-            path: .getPhotos,
+            path: .searchPhotos,
             queryItems: [
                 .init(
                     name: Query.ArgumentName.per_page.rawValue,
@@ -278,10 +278,14 @@ extension APIService: APIServiceProtocol {
             }
             
             do {
-                guard let photoResponseData = try self?.jsonDecoder.decode(GetPhotosResponse.self, from: data) else {
+                guard 
+                    let photoResponseData = try self?.jsonDecoder.decode(SearchPhotosResponse.self, from: data),
+                    let result = photoResponseData.results
+                else {
                     print("ERROR: Couldnt decode photoResponseData"); return
                 }
-                let photos = photoResponseData.map {
+                
+                let photos = result.map {
                     Photo(
                         id: $0.id,
                         description: $0.description,
