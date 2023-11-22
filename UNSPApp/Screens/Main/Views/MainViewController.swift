@@ -295,7 +295,7 @@ extension MainViewController: UIViewControllerTransitioningDelegate {
                              source: UIViewController) -> UIViewControllerAnimatedTransitioning? {
         CustomTransition(
             transitionType: .present,
-            duration: 0.8,
+            duration: 0.6,
             statringPoint: startingAnimationPoint
         )
     }
@@ -303,7 +303,7 @@ extension MainViewController: UIViewControllerTransitioningDelegate {
     func animationController(forDismissed
                              dismissed: UIViewController) -> UIViewControllerAnimatedTransitioning? {
         CustomTransition(
-            transitionType: .dismiss, 
+            transitionType: .dismiss,
             duration: 0.4,
             statringPoint: startingAnimationPoint
         )

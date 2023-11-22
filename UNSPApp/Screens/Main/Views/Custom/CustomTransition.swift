@@ -61,13 +61,11 @@ final class CustomTransition: NSObject {
                 delay: 0.1,
                 options: [.curveEaseOut, .transitionCurlDown]
             ) {
-                
                 view.center = center
-                view.backgroundColor = bgColor
                 view.transform = CGAffineTransform.identity
+                view.backgroundColor = bgColor
                 
             } completion: { finished in
-                
                 context.completeTransition(finished)
                 print(R.Strings.animatedTransitionCompleted.rawValue)
             }
@@ -77,22 +75,26 @@ final class CustomTransition: NSObject {
             // Prepare to animation
             context.containerView.addSubview(view)
 
-            
             // Process
-            UIView.animate(
-                withDuration: duration,
-                delay: 0.1,
-                options: [.curveEaseIn, .transitionCurlUp]
-            ) {
+            
+            UIView.animate(withDuration: 0.2) {
                 
                 view.backgroundColor = .clear
-                view.center = self.statringPoint
-                view.transform = CGAffineTransform(scaleX: 0.01, y: 0.01)
                 
-            } completion: { finished in
-                view.removeFromSuperview()
-                context.completeTransition(finished)
-                print(R.Strings.animatedTransitionCompleted.rawValue)
+                UIView.animate(
+                    withDuration: self.duration,
+                    delay: 0.1,
+                    options: [.curveEaseIn, .transitionCurlUp]
+                ) {
+                    
+                    view.center = self.statringPoint
+                    view.transform = CGAffineTransform(scaleX: 0.01, y: 0.01)
+                    
+                } completion: { finished in
+                    view.removeFromSuperview()
+                    context.completeTransition(finished)
+                    print(R.Strings.animatedTransitionCompleted.rawValue)
+                }
             }
         }
     }
