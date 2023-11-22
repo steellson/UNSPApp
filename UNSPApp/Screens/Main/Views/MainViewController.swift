@@ -295,7 +295,7 @@ extension MainViewController: UIViewControllerTransitioningDelegate {
                              source: UIViewController) -> UIViewControllerAnimatedTransitioning? {
         CustomTransition(
             transitionType: .present,
-            duration: 0.5,
+            duration: 0.3,
             statringPoint: startingAnimationPoint
         )
     }

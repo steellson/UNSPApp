@@ -79,6 +79,15 @@ final class ImageCell: BaseCell {
         tapRecognizer.addTarget(self, action: #selector(didTapped))
     }
     
+    private func clear() {
+        cancellables.removeAll()
+        
+        UIView.animate(withDuration: 0.2) {
+            self.imageView.image = nil
+            self.setupActivityIndicator()
+        }
+    }
+    
     @objc private func didTapped() {
         guard let image = imageView.image,
               let data = image.jpegData(compressionQuality: 1),
@@ -122,6 +131,6 @@ extension ImageCell {
     
     override func clearCell() {
         super.clearCell()
-        cancellables.removeAll()
+        clear()
     }
 }
