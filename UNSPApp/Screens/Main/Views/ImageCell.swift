@@ -8,12 +8,17 @@
 import Foundation
 import UIKit
 import SnapKit
+import Combine
+
+typealias ImageCellOutput = (Data, IndexPath)
 
 //MARK: - Impl
 
 final class ImageCell: BaseCell {
-
+    
     static let imageCellIdentifier = R.Strings.imageCellIdentifier.rawValue
+    
+    private let tapRecognizer = UITapGestureRecognizer()
     
     private let activityIndicator: UIActivityIndicatorView = {
         let indicator = UIActivityIndicatorView()
@@ -25,10 +30,16 @@ final class ImageCell: BaseCell {
     
     private let imageView = UIImageView()
     
+    var didTapSubject = PassthroughSubject<ImageCellOutput, Never>()
+    var cancellables = Set<AnyCancellable>()
     
-    func configureCell(withImage image: UIImage) {
+    var indexPath: IndexPath?
+    
+    
+    func configureCell(withImage image: UIImage, indexPath: IndexPath) {
         DispatchQueue.main.async { [weak self] in
             self?.imageView.image = image
+            self?.indexPath = indexPath
             self?.setupActivityIndicator()
         }
     }
@@ -39,10 +50,11 @@ final class ImageCell: BaseCell {
     private func setupContentView() {
         contentView.backgroundColor = .systemBackground.withAlphaComponent(0.5)
         contentView.layer.borderColor = UIColor.systemGray.cgColor
-        contentView.layer.borderWidth = 0.5
+        contentView.layer.borderWidth = 0.3
         contentView.clipsToBounds = true
         contentView.layer.masksToBounds = true
         contentView.translatesAutoresizingMaskIntoConstraints = false
+        contentView.addGestureRecognizer(tapRecognizer)
         contentView.addNewSubview(activityIndicator)
         contentView.addNewSubview(imageView)
     }
@@ -62,6 +74,21 @@ final class ImageCell: BaseCell {
         imageView.contentMode = .scaleAspectFit
         imageView.tintColor = .black
     }
+    
+    private func setupTapGesture() {
+        tapRecognizer.addTarget(self, action: #selector(didTapped))
+    }
+    
+    @objc private func didTapped() {
+        guard let image = imageView.image,
+              let data = image.jpegData(compressionQuality: 1),
+              let indexPath = indexPath
+        else { return }
+            
+        let output = ImageCellOutput(data, indexPath)
+        
+        didTapSubject.send(output)
+    }
 }
             
 //MARK: - Base
@@ -73,6 +100,7 @@ extension ImageCell {
         setupContentView()
         setupImageView()
         setupActivityIndicator()
+        setupTapGesture()
     }
     
     override func setupCellLayout() {
@@ -91,5 +119,9 @@ extension ImageCell {
             $0.edges.equalToSuperview()
         }
     }
+    
+    override func clearCell() {
+        super.clearCell()
+        cancellables.removeAll()
+    }
 }
-

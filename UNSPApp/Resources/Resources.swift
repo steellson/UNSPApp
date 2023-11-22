@@ -34,7 +34,8 @@ enum R {
         case photosFetched = "SUCCESS: Photos fetched succsessfully!"
         case photoFetched = "SUCCESS: Photo downloaded succsessfully!"
         case photosSearched = "SUCCESS: Some photos searched!"
-        case photoDataSourceUpdated = "--- MainViewModel photos data updated! ---"
+        case photoDataSourceUpdated = ">>> MainViewModel photos data updated!"
+        case animatedTransitionCompleted = ">>> Animation transition completed!"
     }
     
     

@@ -13,7 +13,7 @@ import UIKit
 final class DetailViewController: BaseController {
     
     private let viewModel: DetailViewModel
-    
+            
     private let tapGesture = UITapGestureRecognizer()
     private let imageView = UIImageView()
     
@@ -35,20 +35,28 @@ final class DetailViewController: BaseController {
     //MARK: - Setup
     
     private func setupContentView() {
+        view.backgroundColor = .black.withAlphaComponent(0.9)
+        view.addGestureRecognizer(tapGesture)
         view.addSubview(imageView)
     }
     
     private func setupTapGesture() {
-        
+        tapGesture.addTarget(self, action: #selector(didTapped))
     }
     
     private func setupImageView() {
         imageView.contentMode = .scaleAspectFit
-        imageView.addGestureRecognizer(tapGesture)
+        
+        let imageData = viewModel.getImageData()
+        imageView.image = convertImage(fromData: imageData)
     }
     
-    private func setDelegates() {
-        
+    private func convertImage(fromData data: Data) -> UIImage {
+        UIImage(data: data) ?? UIImage(named: "ximage")!
+    }
+    
+    @objc private func didTapped() {
+        self.dismiss(animated: true)
     }
 }
 
@@ -61,31 +69,17 @@ extension DetailViewController {
         super.setupView()
         setupContentView()
         setupTapGesture()
-        setupImageView()
-        setDelegates()
+        setupImageView()        
     }
     
     override func setupLayout() {
         super.setupLayout()
         
         imageView.frame = CGRect(
-            x: view.center.x,
-            y: view.center.y,
+            x: .zero,
+            y: .zero,
             width: view.bounds.width,
             height: view.bounds.height
         )
     }
-}
-
-
-//MARK: - Observe
-
-private extension DetailViewController {
-    
-}
-
-//MARK: - Transitioning Delegate
-
-extension DetailViewController: UIViewControllerTransitioningDelegate {
-    
 }
