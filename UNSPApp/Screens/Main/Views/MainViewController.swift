@@ -20,9 +20,7 @@ class MainViewController: BaseController {
         
     private var collectionView: UICollectionView!
     private var collectionViewLayout = CustomLayout()
-    
-    private let transition = CustomTransition(transitionType: .present, duration: 2.0)
-    
+        
     private var dataSource: UICollectionViewDiffableDataSource<Section, Photo>!
     
     private var viewDidLoadSubject = PassthroughSubject<Void, Never>()
@@ -94,7 +92,7 @@ class MainViewController: BaseController {
         cell.didTapSubject.sink(receiveValue: { [weak self] photo in
             
             let detailModule = Assembly.builder.build(module: .detail(photo))
-            detailModule.transitioningDelegate = self?.transition
+            detailModule.transitioningDelegate = self
             detailModule.modalPresentationStyle = .custom
             self?.present(detailModule, animated: true)
         })
@@ -263,5 +261,23 @@ extension MainViewController: CustomLayoutDelegate {
         )
         let screenWidth = UIScreen.main.bounds.width / 2
         return (receivedImageSize.height / receivedImageSize.width) * screenWidth
+    }
+}
+
+//MARK: - Transitioning Delegate
+
+extension MainViewController: UIViewControllerTransitioningDelegate {
+    
+    func animationController(forPresented presented: UIViewController,
+                             presenting: UIViewController,
+                             source: UIViewController) -> UIViewControllerAnimatedTransitioning? {
+        
+        CustomTransition(transitionType: .present, duration: 1.0)
+    }
+    
+    func animationController(forDismissed
+                             dismissed: UIViewController) -> UIViewControllerAnimatedTransitioning? {
+        
+        CustomTransition(transitionType: .dismiss, duration: 0.6)
     }
 }
