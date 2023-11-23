@@ -27,9 +27,7 @@ final class MainViewModel {
     }
     
     struct Output {
-        let searchQueryTextPublisher: AnyPublisher<Void, Never>
         let setDataSourcePublisher: AnyPublisher<[Photo], Never>
-        let quitFromSearch: AnyPublisher<Bool, Never>
     }
     
     
@@ -56,6 +54,8 @@ final class MainViewModel {
     
     private let apiService: APIServiceProtocol
     
+    private var cancellables = Set<AnyCancellable>()
+    
     
     //MARK: Init
     
@@ -77,21 +77,26 @@ final class MainViewModel {
     }
 }
 
-
-//MARK: - Public methods
+//MARK: - Reactive
 
 extension MainViewModel {
     
     func transform(input: Input) -> Output {
-                
-        let searchQueryTextPublisher = input
+        subscribeOnQueryText(withInput: input)
+        
+        return Output(
+            setDataSourcePublisher: $photos.eraseToAnyPublisher()
+        )
+    }
+    
+    private func subscribeOnQueryText(withInput input: Input) {
+        input
             .searchQueryTextPublisher
             .dropFirst()
             .removeDuplicates()
             .debounce(for: 0.5, scheduler: RunLoop.main)
             .compactMap { $0 }
-            .handleEvents(
-                receiveOutput:  { [weak self] queryText in
+            .sink { [weak self] queryText in
                     if queryText == "" {
                         self?.photos = []
                         self?.getAllPhotos()
@@ -99,25 +104,14 @@ extension MainViewModel {
                         self?.searchPhotos(withText: queryText)
                     }
                 }
-            )
-            .flatMap { _ in Just(()) }
-            .eraseToAnyPublisher()
-        
-        let setDataSourcePublisher = $photos.eraseToAnyPublisher()
-        
-        let quitFromSearch = input
-            .searchQueryTextPublisher
-            .dropFirst()
-            .compactMap { $0 == "" }
-            .eraseToAnyPublisher()
-
-        return Output(
-            searchQueryTextPublisher: searchQueryTextPublisher,
-            setDataSourcePublisher: setDataSourcePublisher,
-            quitFromSearch: quitFromSearch
-        )
+            .store(in: &cancellables)
+            
     }
-    
+}
+
+//MARK: - Public methods
+
+extension MainViewModel {
     
     //MARK: Get all photos
     func getAllPhotos() {

@@ -78,14 +78,6 @@ class MainViewController: BaseController {
         searchController.searchResultsUpdater = self
     }
     
-    private func setupSearchCancelButtonVisability() {
-        guard let queryText = viewModel.queryText else { return }
-        let searchIsActive = searchController.isActive
-        let isButtonShown = queryText.isEmpty && searchIsActive
-        
-        searchController.searchBar.showsCancelButton = isButtonShown
-    }
-    
     private func setupCollectionView(withLayout layout: UICollectionViewLayout) {
         collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
         collectionView.layer.cornerRadius = 10
@@ -163,12 +155,6 @@ private extension MainViewController {
         let input = MainViewModel.Input(searchQueryTextPublisher: queryTextSubject.eraseToAnyPublisher())
         let output = viewModel.transform(input: input)
         
-        output.searchQueryTextPublisher
-            .sink { [weak self] _ in
-                self?.setupSearchCancelButtonVisability()
-            }
-            .store(in: &cancellables)
-        
         output.setDataSourcePublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] photos in
@@ -176,14 +162,6 @@ private extension MainViewController {
                     UIView.animate(withDuration: 0.5) {
                         self?.updateSnapshot(withPhotos: photos)
                     }
-                }
-            }
-            .store(in: &cancellables)
-        
-        output.quitFromSearch
-            .sink { textIsEmpty in
-                if textIsEmpty {
-                    print("Searh text is empty!")
                 }
             }
             .store(in: &cancellables)
